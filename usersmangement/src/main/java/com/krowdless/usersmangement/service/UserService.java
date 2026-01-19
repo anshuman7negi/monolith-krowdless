@@ -46,6 +46,7 @@ public class UserService {
         return repository.findByUsername(username).orElse(null);
     }
 
+    @Transactional
     public UserResponseDto register(UserRegisterRequestDto dto) {
         UserEntity user = new UserEntity();
         user.setUsername(dto.getUsername());
