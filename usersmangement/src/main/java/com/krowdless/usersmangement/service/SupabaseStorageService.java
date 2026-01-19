@@ -18,7 +18,7 @@ public class SupabaseStorageService {
     @Value("${supabase.bucket}")
     private String bucket;
 
-    @Value("${supabase.service-key}")
+    @Value("${supabase.service_key}")
     private String serviceRoleKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
