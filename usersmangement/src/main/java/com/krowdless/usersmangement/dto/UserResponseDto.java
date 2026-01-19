@@ -8,6 +8,7 @@ public class UserResponseDto {
     private String phone;
     private String role;
     private boolean verified;
+    
 
     public Long getId() {
         return id;
