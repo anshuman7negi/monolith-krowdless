@@ -63,8 +63,8 @@ public class UserService {
         return toResponseDto(repository.save(user));
     }
 
-    public LoginResponseDto login(String username, String password) {
-        return repository.findByUsername(username)
+    public LoginResponseDto login(String email, String password) {
+        return repository.findByEmail(email)
                 .filter(u -> passwordEncoder.matches(password, u.getPassword()))
                 .map(u -> {
                     String jti = java.util.UUID.randomUUID().toString();

@@ -37,7 +37,7 @@ public class UserController {
     public ApiResponse<LoginResponseDto> login(@Valid @RequestBody UserLoginRequestDto request) {
         logger.info("-------------------------------Method Entry: login-------------------------------------------");
 
-        LoginResponseDto responseDto = service.login(request.getUsername(), request.getPassword());
+        LoginResponseDto responseDto = service.login(request.getEmail(), request.getPassword());
 
         if (responseDto == null) {
             return new ApiResponse<>("error", "Invalid username or password", null);
