@@ -12,13 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class SupabaseStorageService {
 
-    @Value("${supabase.url}")
+    @Value("${SUPABASE_URL}")
     private String supabaseUrl;
 
-    @Value("${supabase.bucket}")
+    @Value("${SUPABASE_BUCKET}")
     private String bucket;
 
-    @Value("${supabase.service_key}")
+    @Value("${SUPABASE_SERVICE_KEY}")
     private String serviceRoleKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
