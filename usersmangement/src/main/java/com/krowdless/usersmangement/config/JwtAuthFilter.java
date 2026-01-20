@@ -42,6 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             path.equals("/users/register") ||
             path.equals("/users/ping") ||
             path.startsWith("/actuator") ||
+            path.startsWith("/master") ||
             "OPTIONS".equalsIgnoreCase(request.getMethod())
         ) {
             filterChain.doFilter(request, response);
