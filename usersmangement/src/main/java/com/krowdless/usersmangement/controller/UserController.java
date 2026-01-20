@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,7 @@ import com.krowdless.usersmangement.dto.UserLoginRequestDto;
 import com.krowdless.usersmangement.dto.UserProfileDto;
 import com.krowdless.usersmangement.dto.UserRegisterRequestDto;
 import com.krowdless.usersmangement.dto.UserResponseDto;
+import com.krowdless.usersmangement.entity.UserEntity;
 import com.krowdless.usersmangement.service.UserService;
 
 import jakarta.validation.Valid;
@@ -80,31 +82,32 @@ public class UserController {
         return new ApiResponse<>("success", "Logged out", null);
     }
 
-    @PostMapping(value = "/{userId}/profile-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<UserResponseDto> uploadProfilePhoto(
-            @PathVariable Long userId,
+    @PostMapping(value = "/me/profile-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<UserResponseDto> uploadMyProfilePhoto(
+            @AuthenticationPrincipal UserEntity user,
             @RequestPart("file") MultipartFile file) {
-
-        UserResponseDto dto = service.uploadProfilePhoto(userId, file);
-
-        return new ApiResponse<>("success", "Profile image uploaded", dto);
-    }
-
-    @GetMapping("/{userId}/profile-photo")
-    public ApiResponse<String> getProfilePhoto(@PathVariable Long userId) {
-
-        String imageUrl = service.getProfilePhotoUrl(userId);
-
-        return new ApiResponse<>("success", "Profile photo fetched", imageUrl);
-    }
-
-    @GetMapping("/{userId}/profile")
-    public ApiResponse<UserProfileDto> getUserProfile(@PathVariable Long userId) {
+        UserResponseDto dto = service.uploadProfilePhoto(user.getId(), file);
 
         return new ApiResponse<>(
                 "success",
+                "Profile image uploaded",
+                dto);
+    }
+
+    @GetMapping("/me/profile-photo")
+    public ApiResponse<String> getMyProfilePhoto(
+            @AuthenticationPrincipal UserEntity user) {
+        String imageUrl = service.getProfilePhotoUrl(user.getId());
+        return new ApiResponse<>("success", "Profile photo fetched", imageUrl);
+    }
+
+    @GetMapping("/me/profile")
+    public ApiResponse<UserProfileDto> getMyProfile(
+            @AuthenticationPrincipal UserEntity user) {
+        return new ApiResponse<>(
+                "success",
                 "User profile loaded",
-                service.getUserProfile(userId));
+                service.getUserProfile(user.getId()));
     }
 
 }

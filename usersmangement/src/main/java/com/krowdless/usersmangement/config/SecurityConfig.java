@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,23 +29,35 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
             .authorizeHttpRequests(auth -> auth
+
+                // ✅ PRE-FLIGHT
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // ✅ PUBLIC ENDPOINTS
                 .requestMatchers(
-                    "/users/register",
                     "/users/login",
+                    "/users/register",
+                    "/users/refresh",
                     "/users/ping",
                     "/actuator/**"
                 ).permitAll()
+
+                // 🔐 USER SELF APIs (JWT REQUIRED)
+                .requestMatchers("/users/me/**").authenticated()
+
+                // 🔒 EVERYTHING ELSE
                 .anyRequest().authenticated()
-            )
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             );
 
         http.addFilterBefore(
-                jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class
+            jwtAuthFilter,
+            UsernamePasswordAuthenticationFilter.class
         );
 
         return http.build();
@@ -56,11 +67,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // ✅ PRODUCTION-SAFE CORS
+        // ✅ FRONTEND ORIGINS
         config.setAllowedOriginPatterns(List.of(
+            "http://localhost:*",
             "https://*.railway.app",
-            "https://krowdless.onrender.com",
-            "http://localhost:*"
+            "https://krowdless.onrender.com"
         ));
 
         config.setAllowedMethods(List.of(
@@ -68,7 +79,8 @@ public class SecurityConfig {
         ));
 
         config.setAllowedHeaders(List.of(
-            "Authorization", "Content-Type"
+            "Authorization",
+            "Content-Type"
         ));
 
         config.setAllowCredentials(true);
