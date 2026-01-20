@@ -85,4 +85,12 @@ public class UserController {
         return new ApiResponse<>("success", "Profile image uploaded", dto);
     }
 
+    @GetMapping("/{userId}/profile-photo")
+    public ApiResponse<String> getProfilePhoto(@PathVariable Long userId) {
+
+        String imageUrl = service.getProfilePhotoUrl(userId);
+
+        return new ApiResponse<>("success", "Profile photo fetched", imageUrl);
+    }
+
 }

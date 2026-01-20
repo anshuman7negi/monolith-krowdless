@@ -167,12 +167,31 @@ public class UserService {
         UserEntity user = repository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // 1️⃣ Delete old image from bucket (if exists)
+        if (user.getProfileImageUrl() != null) {
+            supabaseStorageService.deleteUserProfile(user.getProfileImageUrl());
+        }
+
+        // 2️⃣ Upload new image
         String imageUrl = supabaseStorageService.uploadUserProfile(userId, file);
 
+        // 3️⃣ Update DB
         user.setProfileImageUrl(imageUrl);
         repository.save(user);
 
         return toResponseDto(user);
+    }
+
+    public String getProfilePhotoUrl(Long userId) {
+
+        UserEntity user = repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getProfileImageUrl() == null) {
+            throw new RuntimeException("Profile photo not uploaded");
+        }
+
+        return user.getProfileImageUrl();
     }
 
 }

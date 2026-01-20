@@ -55,4 +55,46 @@ public class SupabaseStorageService {
             throw new RuntimeException("Supabase image upload failed", e);
         }
     }
+
+    public void deleteUserProfile(String imageUrl) {
+
+    if (imageUrl == null || imageUrl.isBlank()) {
+        return;
+    }
+
+    try {
+        // imageUrl example:
+        // https://xyz.supabase.co/storage/v1/object/public/profile-images/users/user_1/profile_123.jpg
+
+        String publicPrefix = "/storage/v1/object/public/" + bucket + "/";
+        int index = imageUrl.indexOf(publicPrefix);
+
+        if (index == -1) {
+            return;
+        }
+
+        String filePath = imageUrl.substring(index + publicPrefix.length());
+
+        String deleteUrl = supabaseUrl +
+                "/storage/v1/object/" + bucket + "/" + filePath;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + serviceRoleKey);
+        headers.set("apikey", serviceRoleKey);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        restTemplate.exchange(
+                deleteUrl,
+                HttpMethod.DELETE,
+                request,
+                String.class
+        );
+
+    } catch (Exception e) {
+        // ⚠️ delete fail hone pe app crash nahi karna
+        System.err.println("Failed to delete old profile image: " + e.getMessage());
+    }
+}
+
 }
