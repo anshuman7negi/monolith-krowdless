@@ -1,6 +1,7 @@
 package com.krowdless.usersmangement.dto;
 
 public class LoginResponseDto {
+    private Long userId;
     private String token;
     private String refreshToken;
     private String username;
@@ -8,11 +9,16 @@ public class LoginResponseDto {
     private boolean verified;
 
     public LoginResponseDto(String token, String refreshToken, String username, String role, boolean verified) {
+        this.userId = userId;
         this.token = token;
         this.refreshToken = refreshToken;
         this.username = username;
         this.role = role;
         this.verified = verified;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 
     public String getToken() {
