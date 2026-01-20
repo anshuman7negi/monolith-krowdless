@@ -28,26 +28,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private UserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
 
-        // ✅ PUBLIC & PRE-FLIGHT BYPASS
+        // ✅ ONLY PUBLIC ENDPOINTS
         if (
-            path.startsWith("/users/")
-            || path.startsWith("/actuator/")
-            || "OPTIONS".equalsIgnoreCase(request.getMethod())
+            path.equals("/users/login") ||
+            path.equals("/users/register") ||
+            path.equals("/users/ping") ||
+            path.startsWith("/actuator") ||
+            "OPTIONS".equalsIgnoreCase(request.getMethod())
         ) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
-        // ✅ NO AUTH HEADER → SKIP JWT
+        // ✅ NO TOKEN → CONTINUE (Spring Security will block if needed)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -55,7 +58,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String jwt = authHeader.substring(7);
 
-        // ✅ EMPTY TOKEN SAFETY
         if (jwt.isBlank()) {
             filterChain.doFilter(request, response);
             return;
@@ -72,26 +74,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .orElse(null);
 
                 if (user != null && jwtUtil.validateToken(jwt, username)) {
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     user,
                                     null,
                                     new ArrayList<>()
                             );
+
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource()
                                     .buildDetails(request)
                     );
 
-                    SecurityContextHolder
-                            .getContext()
+                    SecurityContextHolder.getContext()
                             .setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
-            // ❗ NEVER BLOCK REQUEST
-            filterChain.doFilter(request, response);
-            return;
+            // ❗ token invalid → ignore, let security handle
         }
 
         filterChain.doFilter(request, response);
