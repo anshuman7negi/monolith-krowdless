@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.krowdless.usersmangement.dto.ApiResponse;
 import com.krowdless.usersmangement.dto.LoginResponseDto;
+import com.krowdless.usersmangement.dto.TopTravelerDto;
 import com.krowdless.usersmangement.dto.UserLoginRequestDto;
 import com.krowdless.usersmangement.dto.UserProfileDto;
 import com.krowdless.usersmangement.dto.UserRegisterRequestDto;
@@ -108,6 +110,16 @@ public class UserController {
                 "success",
                 "User profile loaded",
                 service.getUserProfile(user.getId()));
+    }
+
+    @GetMapping("/me/leaderboard")
+    public ApiResponse<Page<TopTravelerDto>> getLeaderboard(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return new ApiResponse<>(
+                "success",
+                "Top travelers loaded",
+                service.getTopTravelers(page, size));
     }
 
 }
