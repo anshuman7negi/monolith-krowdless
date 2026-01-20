@@ -231,9 +231,9 @@ public class UserService {
         return dto;
     }
 
-    public Page<TopTravelerDto> getTopTravelers(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return repository.findTopTravelers(pageable);
-    }
+    // public Page<TopTravelerDto> getTopTravelers(int page, int size) {
+    //     Pageable pageable = PageRequest.of(page, size);
+    //     return repository.findTopTravelers(pageable);
+    // }
 
 }
