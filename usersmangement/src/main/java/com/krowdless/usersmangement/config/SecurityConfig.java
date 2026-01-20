@@ -45,7 +45,8 @@ public class SecurityConfig {
                     "/users/register",
                     "/users/refresh",
                     "/users/ping",
-                    "/actuator/**"
+                    "/actuator/**",
+                    "/master/**" 
                 ).permitAll()
 
                 // 🔐 USER SELF APIs (JWT REQUIRED)
