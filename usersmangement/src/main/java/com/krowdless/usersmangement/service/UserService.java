@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.krowdless.usersmangement.config.JwtUtil;
 import com.krowdless.usersmangement.dto.LoginResponseDto;
+import com.krowdless.usersmangement.dto.UserProfileDto;
 import com.krowdless.usersmangement.dto.UserRegisterRequestDto;
 import com.krowdless.usersmangement.dto.UserResponseDto;
 import com.krowdless.usersmangement.entity.BlacklistedTokenEntity;
@@ -17,6 +18,7 @@ import com.krowdless.usersmangement.entity.UserEntity;
 import com.krowdless.usersmangement.entity.UserRole;
 import com.krowdless.usersmangement.repository.BlacklistedTokenRepository;
 import com.krowdless.usersmangement.repository.RefreshTokenRepository;
+import com.krowdless.usersmangement.repository.UserProfileRepository;
 import com.krowdless.usersmangement.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -41,6 +43,9 @@ public class UserService {
 
     @Autowired
     private SupabaseStorageService supabaseStorageService;
+
+    @Autowired
+    private UserProfileRepository userProfileRepository;
 
     public UserEntity findByUsername(String username) {
         return repository.findByUsername(username).orElse(null);
@@ -192,6 +197,31 @@ public class UserService {
         }
 
         return user.getProfileImageUrl();
+    }
+
+    public UserProfileDto getUserProfile(Long userId) {
+
+        UserEntity user = repository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserProfileDto dto = new UserProfileDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setProfileImageUrl(user.getProfileImageUrl());
+
+        // ABOUT (from user_profile)
+        userProfileRepository.findById(userId)
+                .ifPresentOrElse(
+                        profile -> dto.setAbout(profile.getAbout()),
+                        () -> dto.setAbout("Traveler on KrowdLess 🌍"));
+
+        // MVP defaults (tables abhi nahi bane)
+        dto.setFollowers(0);
+        dto.setCompletedTrips(0);
+        dto.setTotalSpent(0);
+        dto.setRewardPoints(0);
+
+        return dto;
     }
 
 }

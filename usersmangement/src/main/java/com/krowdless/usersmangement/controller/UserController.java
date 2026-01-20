@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.krowdless.usersmangement.dto.ApiResponse;
 import com.krowdless.usersmangement.dto.LoginResponseDto;
 import com.krowdless.usersmangement.dto.UserLoginRequestDto;
+import com.krowdless.usersmangement.dto.UserProfileDto;
 import com.krowdless.usersmangement.dto.UserRegisterRequestDto;
 import com.krowdless.usersmangement.dto.UserResponseDto;
 import com.krowdless.usersmangement.service.UserService;
@@ -36,6 +37,10 @@ public class UserController {
     @PostMapping("/login")
     public ApiResponse<LoginResponseDto> login(@Valid @RequestBody UserLoginRequestDto request) {
         logger.info("-------------------------------Method Entry: login-------------------------------------------");
+        logger.error(
+                "LOGIN DEBUG email={}, password={}",
+                request.getEmail(),
+                request.getPassword());
 
         LoginResponseDto responseDto = service.login(request.getEmail(), request.getPassword());
 
@@ -91,6 +96,15 @@ public class UserController {
         String imageUrl = service.getProfilePhotoUrl(userId);
 
         return new ApiResponse<>("success", "Profile photo fetched", imageUrl);
+    }
+
+    @GetMapping("/{userId}/profile")
+    public ApiResponse<UserProfileDto> getUserProfile(@PathVariable Long userId) {
+
+        return new ApiResponse<>(
+                "success",
+                "User profile loaded",
+                service.getUserProfile(userId));
     }
 
 }
