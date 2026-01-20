@@ -12,12 +12,12 @@ import com.krowdless.usersmangement.dto.TopTravelerDto;
 import com.krowdless.usersmangement.entity.UserEntity;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity,Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+
     Optional<UserEntity> findByUsername(String username);
-     Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByEmail(String email);
 
-
-     @Query("""
+    @Query("""
     SELECT new com.krowdless.usersmangement.dto.TopTravelerDto(
         u.id,
         u.username,
@@ -30,10 +30,10 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
         COUNT(f.id)
     )
     FROM UserEntity u
-    JOIN UserRewardsSummary urs ON urs.userId = u.id
-    LEFT JOIN UserTitle ut ON ut.userId = u.id
-    LEFT JOIN Title t ON t.id = ut.titleId
-    LEFT JOIN Follower f ON f.followingId = u.id
+    JOIN UserRewardsSummaryEntity urs ON urs.userId = u.id
+    LEFT JOIN UserTitleEntity ut ON ut.userId = u.id
+    LEFT JOIN TitleEntity t ON t.id = ut.titleId
+    LEFT JOIN FollowerEntity f ON f.followingId = u.id
     GROUP BY
         u.id, u.username, u.profileImageUrl,
         urs.totalPoints, urs.totalTrips, urs.totalSpent,
@@ -45,5 +45,4 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
         u.id ASC
     """)
     Page<TopTravelerDto> findTopTravelers(Pageable pageable);
-  
 }
