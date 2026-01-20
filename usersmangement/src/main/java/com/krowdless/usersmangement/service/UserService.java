@@ -69,6 +69,7 @@ public class UserService {
         return toResponseDto(repository.save(user));
     }
 
+    @Transactional
     public LoginResponseDto login(String email, String password) {
         return repository.findByEmail(email)
                 .filter(u -> passwordEncoder.matches(password, u.getPassword()))
