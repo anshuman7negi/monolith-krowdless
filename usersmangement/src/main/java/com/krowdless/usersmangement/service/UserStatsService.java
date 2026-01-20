@@ -44,12 +44,12 @@ public class UserStatsService {
                     dto.setTotalSpent(rs.getTotalSpent());
                 });
 
-        userTitleRepository.findLatestTitle(userId)
-                .stream()
-                .findFirst()
-                .ifPresent(t -> {
-                    dto.setTitleName(t.getName());
-                });
+        // userTitleRepository.findLatestTitle(userId)
+        //         .stream()
+        //         .findFirst()
+        //         .ifPresent(t -> {
+        //             dto.setTitleName(t.getName());
+        //         });
 
         return dto;
     }
