@@ -92,6 +92,7 @@ public class UserService {
                     refreshTokenRepository.save(rt);
 
                     return new LoginResponseDto(
+                            u.getId(), 
                             accessToken,
                             rt.getToken(),
                             u.getUsername(),
@@ -141,7 +142,7 @@ public class UserService {
         newRt.setExpiresAt(LocalDateTime.now().plusDays(15));
         refreshTokenRepository.save(newRt);
 
-        return new LoginResponseDto(newAccess, newRt.getToken(), u.getUsername(), u.getRole().name(), u.isVerified());
+        return new LoginResponseDto(u.getId(), newAccess, newRt.getToken(), u.getUsername(), u.getRole().name(), u.isVerified());
     }
 
     public void logout(String accessToken, String refreshToken) {

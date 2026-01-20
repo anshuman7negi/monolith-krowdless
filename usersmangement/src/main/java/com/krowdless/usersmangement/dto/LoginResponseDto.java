@@ -8,7 +8,7 @@ public class LoginResponseDto {
     private String role;
     private boolean verified;
 
-    public LoginResponseDto(String token, String refreshToken, String username, String role, boolean verified) {
+    public LoginResponseDto(Long userId, String token, String refreshToken, String username, String role, boolean verified) {
         this.userId = userId;
         this.token = token;
         this.refreshToken = refreshToken;
