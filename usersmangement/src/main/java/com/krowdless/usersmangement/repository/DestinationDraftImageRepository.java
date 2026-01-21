@@ -8,9 +8,11 @@ import java.util.List;
 public interface DestinationDraftImageRepository
         extends JpaRepository<DestinationDraftImage, Long> {
 
-    List<DestinationDraftImage> findByDestinationDraftIdOrderBySortOrder(Long destinationDraftId);
+    List<DestinationDraftImage>
+        findByDestinationDraftIdOrderBySortOrder(Long destinationDraftId);
 
-    long countByDestinationDraftId(Long destinationDraftId);
+    List<DestinationDraftImage>
+        findByDestinationDraftId(Long destinationDraftId);
 
-    void deleteByDestinationDraftIdAndId(Long destinationDraftId, Long id);
+    void deleteByDestinationDraftId(Long destinationDraftId);
 }

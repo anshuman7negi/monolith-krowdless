@@ -10,6 +10,6 @@ public interface DestinationDraftRepository
         extends JpaRepository<DestinationDraft, Long> {
 
     List<DestinationDraft> findByCreatedBy(Long createdBy);
-    
+
     Optional<DestinationDraft> findByIdAndCreatedBy(Long id, Long createdBy);
 }

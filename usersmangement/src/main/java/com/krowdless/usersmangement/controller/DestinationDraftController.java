@@ -54,4 +54,9 @@ public class DestinationDraftController {
         return service.getDraftImages(draftId, getLoggedInUserId());
     }
 
+    @DeleteMapping("/{draftId}")
+    public void deleteDraft(@PathVariable Long draftId) {
+        service.deleteDraft(draftId, getLoggedInUserId());
+    }
+
 }

@@ -140,5 +140,40 @@ public String uploadDestinationDraftImage(
     }
 }
 
+public void deleteDestinationDraftImage(String imageUrl) {
+
+    if (imageUrl == null || imageUrl.isBlank()) return;
+
+    try {
+        String publicPrefix = "/storage/v1/object/public/" + bucket + "/";
+        int index = imageUrl.indexOf(publicPrefix);
+
+        if (index == -1) return;
+
+        String filePath =
+                imageUrl.substring(index + publicPrefix.length());
+
+        String deleteUrl = supabaseUrl +
+                "/storage/v1/object/" + bucket + "/" + filePath;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + serviceRoleKey);
+        headers.set("apikey", serviceRoleKey);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        restTemplate.exchange(
+                deleteUrl,
+                HttpMethod.DELETE,
+                request,
+                String.class
+        );
+
+    } catch (Exception e) {
+        System.err.println("Failed to delete destination image: " + e.getMessage());
+    }
+}
+
+
 
 }

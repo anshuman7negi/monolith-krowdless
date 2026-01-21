@@ -92,4 +92,35 @@ public class DestinationDraftService {
                 .findByDestinationDraftIdOrderBySortOrder(draftId);
     }
 
+    @Transactional
+    public void deleteDraft(Long draftId, Long userId) {
+
+        DestinationDraft draft = repository.findById(draftId)
+                .orElseThrow(() -> new RuntimeException("Draft not found"));
+
+        // 🔐 owner check
+        if (!draft.getCreatedBy().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // ❌ approved not allowed
+        if (!"PENDING".equals(draft.getStatus())) {
+            throw new RuntimeException("Approved destination cannot be deleted");
+        }
+
+        // 1️⃣ fetch images
+        List<DestinationDraftImage> images = draftImageRepository.findByDestinationDraftId(draftId);
+
+        // 2️⃣ delete images from Supabase
+        for (DestinationDraftImage img : images) {
+            storageService.deleteDestinationDraftImage(img.getImageUrl());
+        }
+
+        // 3️⃣ delete image rows
+        draftImageRepository.deleteByDestinationDraftId(draftId);
+
+        // 4️⃣ delete draft row ✅ CORRECT REPO
+        repository.delete(draft);
+    }
+
 }
