@@ -112,14 +112,5 @@ public class UserController {
                 service.getUserProfile(user.getId()));
     }
 
-    // @GetMapping("/me/leaderboard")
-    // public ApiResponse<Page<TopTravelerDto>> getLeaderboard(
-    //         @RequestParam(defaultValue = "0") int page,
-    //         @RequestParam(defaultValue = "10") int size) {
-    //     return new ApiResponse<>(
-    //             "success",
-    //             "Top travelers loaded",
-    //             service.getTopTravelers(page, size));
-    // }
 
 }
