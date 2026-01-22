@@ -1,13 +1,10 @@
 package com.krowdless.usersmangement.controller;
 
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
 import com.krowdless.usersmangement.dto.AdminDestinationDraftDetailDto;
 import com.krowdless.usersmangement.dto.AdminDestinationDraftListDto;
-import com.krowdless.usersmangement.entity.DestinationDraft;
 import com.krowdless.usersmangement.service.AdminDestinationService;
 
 @RestController
@@ -41,7 +38,7 @@ public class AdminDestinationController {
 
     // =========================
     // APPROVE DRAFTcls
-    
+
     // =========================
     @PostMapping("/drafts/{id}/approve")
     public void approveDraft(@PathVariable Long id) {

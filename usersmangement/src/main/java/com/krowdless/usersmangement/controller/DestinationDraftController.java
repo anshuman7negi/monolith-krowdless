@@ -3,6 +3,7 @@ package com.krowdless.usersmangement.controller;
 import com.krowdless.usersmangement.dto.DestinationDraftRequest;
 import com.krowdless.usersmangement.entity.DestinationDraft;
 import com.krowdless.usersmangement.service.DestinationDraftService;
+import com.krowdless.usersmangement.util.SecurityUtil;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -20,24 +21,20 @@ public class DestinationDraftController {
         this.service = service;
     }
 
-    // ⚠️ TEMP: userId hardcoded (JWT baad me)
-    private Long getLoggedInUserId() {
-        return 1L;
-    }
 
     @PostMapping
     public DestinationDraft createDraft(@RequestBody DestinationDraftRequest request) {
-        return service.createDraft(request, getLoggedInUserId());
+        return service.createDraft(request, SecurityUtil.getCurrentUserId());
     }
 
     @GetMapping("/my")
     public List<DestinationDraft> myDrafts() {
-        return service.getMyDrafts(getLoggedInUserId());
+        return service.getMyDrafts(SecurityUtil.getCurrentUserId());
     }
 
     @GetMapping("/{id}")
     public DestinationDraft getDraft(@PathVariable Long id) {
-        return service.getDraft(id, getLoggedInUserId());
+        return service.getDraft(id, SecurityUtil.getCurrentUserId());
     }
 
     @PostMapping(value = "/{draftId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -45,18 +42,18 @@ public class DestinationDraftController {
             @PathVariable Long draftId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("sortOrder") int sortOrder) {
-        service.uploadDraftImage(draftId, file, sortOrder, getLoggedInUserId());
+        service.uploadDraftImage(draftId, file, sortOrder, SecurityUtil.getCurrentUserId());
     }
 
     @GetMapping("/{draftId}/images")
     public List<?> getDraftImages(
             @PathVariable Long draftId) {
-        return service.getDraftImages(draftId, getLoggedInUserId());
+        return service.getDraftImages(draftId, SecurityUtil.getCurrentUserId());
     }
 
     @DeleteMapping("/{draftId}")
     public void deleteDraft(@PathVariable Long draftId) {
-        service.deleteDraft(draftId, getLoggedInUserId());
+        service.deleteDraft(draftId, SecurityUtil.getCurrentUserId());
     }
 
 }
