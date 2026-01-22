@@ -6,4 +6,5 @@ import com.krowdless.usersmangement.entity.StateEntity;
 
 public interface StateRepository extends JpaRepository<StateEntity, Long> {
     List<StateEntity> findByCountryId(Long countryId);
+     List<StateEntity> findByActiveTrueOrderByNameAsc();
 }

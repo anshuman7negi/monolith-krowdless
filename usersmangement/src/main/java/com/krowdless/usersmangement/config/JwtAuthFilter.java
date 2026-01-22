@@ -37,15 +37,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // ✅ ONLY PUBLIC ENDPOINTS
-        if (
-            path.equals("/users/login") ||
-            path.equals("/users/register") ||
-            path.equals("/users/ping") ||
-            path.startsWith("/actuator") ||
-            path.startsWith("/users/me/leaderboard") ||
-            path.startsWith("/master") ||
-            "OPTIONS".equalsIgnoreCase(request.getMethod())
-        ) {
+        if (path.equals("/users/login") ||
+                path.equals("/users/register") ||
+                path.equals("/users/ping") ||
+                path.startsWith("/actuator") ||
+                path.startsWith("/users/me/leaderboard") ||
+                path.startsWith("/api/destinations") ||
+                path.startsWith("/master") ||
+                "OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -69,7 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String username = jwtUtil.extractUsername(jwt);
 
             if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 UserEntity user = userRepository
                         .findByUsername(username)
@@ -77,17 +76,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (user != null && jwtUtil.validateToken(jwt)) {
 
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    user,
-                                    null,
-                                    new ArrayList<>()
-                            );
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            new ArrayList<>());
 
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource()
-                                    .buildDetails(request)
-                    );
+                                    .buildDetails(request));
 
                     SecurityContextHolder.getContext()
                             .setAuthentication(authToken);

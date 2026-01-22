@@ -18,9 +18,6 @@ public class MasterDataService {
     private StateRepository stateRepo;
 
     @Autowired
-    private DestinationRepository destinationRepo;
-
-    @Autowired
     private TitleRepository titleRepo;
 
     public List<CountryEntity> getCountries() {
@@ -29,10 +26,6 @@ public class MasterDataService {
 
     public List<StateEntity> getStatesByCountry(Long countryId) {
         return stateRepo.findByCountryId(countryId);
-    }
-
-    public List<DestinationEntity> getDestinationsByState(Long stateId) {
-        return destinationRepo.findByStateId(stateId);
     }
 
     public List<TitleEntity> getTitles() {

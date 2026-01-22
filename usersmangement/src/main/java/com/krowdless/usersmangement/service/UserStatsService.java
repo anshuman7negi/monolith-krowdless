@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import com.krowdless.usersmangement.dto.UserStatsDto;
 import com.krowdless.usersmangement.entity.UserEntity;
 import com.krowdless.usersmangement.repository.FollowerRepository;
-import com.krowdless.usersmangement.repository.JourneyRepository;
 import com.krowdless.usersmangement.repository.TitleRepository;
 import com.krowdless.usersmangement.repository.UserRepository;
 import com.krowdless.usersmangement.repository.UserRewardsSummaryRepository;
@@ -16,9 +15,7 @@ public class UserStatsService {
 
     @Autowired private UserRepository userRepository;
     @Autowired private FollowerRepository followerRepository;
-    @Autowired private JourneyRepository journeyRepository;
     @Autowired private UserRewardsSummaryRepository rewardsSummaryRepository;
-    @Autowired private TitleRepository userTitleRepository;
 
     public UserStatsDto getUserStats(Long userId) {
 
@@ -34,9 +31,7 @@ public class UserStatsService {
                 followerRepository.countFollowers(userId)
         );
 
-        dto.setTotalPlacesVisited(
-                journeyRepository.countVisitedDestinations(userId)
-        );
+
 
         rewardsSummaryRepository.findByUserId(userId)
                 .ifPresent(rs -> {

@@ -28,12 +28,6 @@ public class MasterDataController {
         return new ApiResponse<>("success", "States loaded", service.getStatesByCountry(countryId));
     }
 
-    // 📍 Destinations by state
-    @GetMapping("/destinations/{stateId}")
-    public ApiResponse<List<DestinationEntity>> getDestinations(@PathVariable Long stateId) {
-        return new ApiResponse<>("success", "Destinations loaded", service.getDestinationsByState(stateId));
-    }
-
     // 🏆 Titles
     @GetMapping("/titles")
     public ApiResponse<List<TitleEntity>> getTitles() {

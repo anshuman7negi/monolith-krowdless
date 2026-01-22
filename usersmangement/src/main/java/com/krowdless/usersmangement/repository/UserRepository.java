@@ -1,14 +1,10 @@
 package com.krowdless.usersmangement.repository;
 
 import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+
 import org.springframework.stereotype.Repository;
 
-import com.krowdless.usersmangement.dto.TopTravelerDto;
 import com.krowdless.usersmangement.entity.UserEntity;
 
 @Repository

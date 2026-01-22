@@ -27,39 +27,39 @@ public class SecurityConfig {
             throws Exception {
 
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
 
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
 
-                // ✅ PRE-FLIGHT
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // ✅ PRE-FLIGHT
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ✅ PUBLIC ENDPOINTS
-                .requestMatchers(
-                    "/users/login",
-                    "/users/register",
-                    "/users/refresh",
-                    "/users/ping",
-                    "/actuator/**",
-                    "/master/**" 
-                ).permitAll()
+                        // ✅ PUBLIC ENDPOINTS
+                        .requestMatchers(
+                                "/users/login",
+                                "/users/register",
+                                "/users/refresh",
+                                "/users/ping",
+                                "/actuator/**",
+                                "/master/**",
 
-                // 🔐 USER SELF APIs (JWT REQUIRED)
-                .requestMatchers("/users/me/**").authenticated()
+                                // ✅ PUBLIC DESTINATION APIs
+                                "/api/destinations",
+                                "/api/destinations/**")
+                        .permitAll()
 
-                // 🔒 EVERYTHING ELSE
-                .anyRequest().authenticated()
-            );
+                        // 🔐 USER SELF APIs (JWT REQUIRED)
+                        .requestMatchers("/users/me/**").authenticated()
+
+                        // 🔒 EVERYTHING ELSE
+                        .anyRequest().authenticated());
 
         http.addFilterBefore(
-            jwtAuthFilter,
-            UsernamePasswordAuthenticationFilter.class
-        );
+                jwtAuthFilter,
+                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -70,24 +70,20 @@ public class SecurityConfig {
 
         // ✅ FRONTEND ORIGINS
         config.setAllowedOriginPatterns(List.of(
-            "http://localhost:*",
-            "https://*.railway.app",
-            "https://krowdless.onrender.com"
-        ));
+                "http://localhost:*",
+                "https://*.railway.app",
+                "https://krowdless.onrender.com"));
 
         config.setAllowedMethods(List.of(
-            "GET", "POST", "PUT", "DELETE", "OPTIONS"
-        ));
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         config.setAllowedHeaders(List.of(
-            "Authorization",
-            "Content-Type"
-        ));
+                "Authorization",
+                "Content-Type"));
 
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
         return source;

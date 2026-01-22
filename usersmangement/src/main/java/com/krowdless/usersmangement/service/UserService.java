@@ -3,16 +3,12 @@ package com.krowdless.usersmangement.service;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.krowdless.usersmangement.config.JwtUtil;
 import com.krowdless.usersmangement.dto.LoginResponseDto;
-import com.krowdless.usersmangement.dto.TopTravelerDto;
 import com.krowdless.usersmangement.dto.UserProfileDto;
 import com.krowdless.usersmangement.dto.UserRegisterRequestDto;
 import com.krowdless.usersmangement.dto.UserResponseDto;
