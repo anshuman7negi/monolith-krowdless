@@ -20,9 +20,9 @@ public class StateEntity {
     private Boolean active = true;
 
     // ✅ MASTER DATA RELATION (OK to keep)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_id", nullable = false)
-    private CountryEntity country;
+
+    @Column(name = "country_id", nullable = false)
+    private Long countryId;
 
     // -------- getters & setters --------
 
@@ -58,11 +58,12 @@ public class StateEntity {
         this.active = active;
     }
 
-    public CountryEntity getCountry() {
-        return country;
+    public Long getCountryId() {
+        return countryId;
     }
 
-    public void setCountry(CountryEntity country) {
-        this.country = country;
+    public void setCountryId(Long countryId) {
+        this.countryId = countryId;
     }
+
 }
