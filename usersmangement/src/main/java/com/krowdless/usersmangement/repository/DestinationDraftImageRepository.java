@@ -4,6 +4,7 @@ import com.krowdless.usersmangement.entity.DestinationDraftImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DestinationDraftImageRepository
         extends JpaRepository<DestinationDraftImage, Long> {
@@ -15,4 +16,9 @@ public interface DestinationDraftImageRepository
         findByDestinationDraftId(Long destinationDraftId);
 
     void deleteByDestinationDraftId(Long destinationDraftId);
+
+        Optional<DestinationDraftImage>
+        findFirstByDestinationDraftIdOrderBySortOrderAsc(Long draftId);
+
+
 }

@@ -1,94 +1,44 @@
-package com.krowdless.usersmangement.entity;
+package com.krowdless.usersmangement.dto;
 
-import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Table(name = "destination_draft")
-public class DestinationDraft {
+public class AdminDestinationDraftDetailDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // =====================
-    // BASIC INFO
-    // =====================
-
-    @Column(name = "state_id", nullable = false)
     private Long stateId;
+    private String stateName;
 
-    @Column(nullable = false)
     private String name;
-
-    @Column(name = "short_description")
     private String shortDescription;
-
-    @Column(name = "full_description")
     private String fullDescription;
-
     private String address;
     private String pincode;
 
     private Double latitude;
     private Double longitude;
-
-    @Column(name = "youtube_video_url")
     private String youtubeVideoUrl;
 
-    @Column(name = "cover_image_url")
-    private String coverImageUrl;
-
-    // =====================
-    // STATUS / AUDIT
-    // =====================
-
-    @Column(nullable = false)
-    private String status = "PENDING"; // PENDING, APPROVED, REJECTED
-
-    @Column(name = "admin_remark")
+    private String status;
     private String adminRemark;
 
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
+    private List<String> images;
 
-    @Column(name = "reviewed_by")
-    private Long reviewedBy;
+    private String createdByName;
+    private String createdByEmail;
 
-    @Column(name = "reviewed_at")
+    private String reviewedByName;
     private LocalDateTime reviewedAt;
 
-    // =====================
-    // TIMESTAMPS
-    // =====================
-
-    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // =====================
-    // AUTO TIMESTAMP HANDLING
-    // =====================
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    // =====================
-    // GETTERS & SETTERS
-    // =====================
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getStateId() {
@@ -99,8 +49,12 @@ public class DestinationDraft {
         this.stateId = stateId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getStateName() {
+        return stateName;
+    }
+
+    public void setStateName(String stateName) {
+        this.stateName = stateName;
     }
 
     public String getName() {
@@ -167,14 +121,6 @@ public class DestinationDraft {
         this.youtubeVideoUrl = youtubeVideoUrl;
     }
 
-    public String getCoverImageUrl() {
-        return coverImageUrl;
-    }
-
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -191,20 +137,36 @@ public class DestinationDraft {
         this.adminRemark = adminRemark;
     }
 
-    public Long getCreatedBy() {
-        return createdBy;
+    public List<String> getImages() {
+        return images;
     }
 
-    public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 
-    public Long getReviewedBy() {
-        return reviewedBy;
+    public String getCreatedByName() {
+        return createdByName;
     }
 
-    public void setReviewedBy(Long reviewedBy) {
-        this.reviewedBy = reviewedBy;
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getCreatedByEmail() {
+        return createdByEmail;
+    }
+
+    public void setCreatedByEmail(String createdByEmail) {
+        this.createdByEmail = createdByEmail;
+    }
+
+    public String getReviewedByName() {
+        return reviewedByName;
+    }
+
+    public void setReviewedByName(String reviewedByName) {
+        this.reviewedByName = reviewedByName;
     }
 
     public LocalDateTime getReviewedAt() {
@@ -219,7 +181,10 @@ public class DestinationDraft {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
+
+    // getters & setters
+    
 }

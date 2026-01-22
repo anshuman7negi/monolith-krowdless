@@ -9,14 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.krowdless.usersmangement.entity.Destination;
-import com.krowdless.usersmangement.entity.DestinationDraft;
-import com.krowdless.usersmangement.entity.DestinationDraftImage;
-import com.krowdless.usersmangement.entity.DestinationImage;
-import com.krowdless.usersmangement.repository.DestinationDraftImageRepository;
-import com.krowdless.usersmangement.repository.DestinationDraftRepository;
-import com.krowdless.usersmangement.repository.DestinationImageRepository;
-import com.krowdless.usersmangement.repository.DestinationRepository;
+import com.krowdless.usersmangement.dto.AdminDestinationDraftDetailDto;
+import com.krowdless.usersmangement.dto.AdminDestinationDraftListDto;
+import com.krowdless.usersmangement.entity.*;
+import com.krowdless.usersmangement.repository.*;
 
 import jakarta.transaction.Transactional;
 
@@ -27,20 +23,29 @@ public class AdminDestinationService {
     private final DestinationImageRepository destinationImageRepository;
     private final DestinationDraftRepository draftRepository;
     private final DestinationDraftImageRepository draftImageRepository;
+    private final StateRepository stateRepository;
+    private final UserRepository userRepository;
 
     public AdminDestinationService(
             DestinationRepository destinationRepository,
             DestinationImageRepository destinationImageRepository,
             DestinationDraftRepository draftRepository,
-            DestinationDraftImageRepository draftImageRepository) {
+            DestinationDraftImageRepository draftImageRepository,
+            StateRepository stateRepository,
+            UserRepository userRepository) {
 
         this.destinationRepository = destinationRepository;
         this.destinationImageRepository = destinationImageRepository;
         this.draftRepository = draftRepository;
         this.draftImageRepository = draftImageRepository;
+        this.stateRepository = stateRepository;
+        this.userRepository = userRepository;
     }
 
-    public Page<DestinationDraft> getDrafts(
+    // =========================
+    // LIST DRAFTS (ADMIN)
+    // =========================
+    public Page<AdminDestinationDraftListDto> getDrafts(
             String status,
             int page,
             int size) {
@@ -50,14 +55,98 @@ public class AdminDestinationService {
                 size,
                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 🔹 status optional
-        if (status == null || status.equalsIgnoreCase("ALL")) {
-            return draftRepository.findAll(pageable);
+        Page<DestinationDraft> drafts =
+                (status == null || status.equalsIgnoreCase("ALL"))
+                        ? draftRepository.findAll(pageable)
+                        : draftRepository.findByStatus(status.toUpperCase(), pageable);
+
+        return drafts.map(draft -> {
+
+            AdminDestinationDraftListDto dto = new AdminDestinationDraftListDto();
+
+            dto.setId(draft.getId());
+            dto.setName(draft.getName());
+            dto.setShortDescription(draft.getShortDescription());
+            dto.setStatus(draft.getStatus());
+            dto.setCreatedAt(draft.getCreatedAt());
+
+            // 🔹 state name
+            stateRepository.findById(draft.getStateId())
+                    .ifPresent(state -> dto.setStateName(state.getName()));
+
+            // 🔹 cover image (first image)
+            dto.setCoverImageUrl(
+                    draftImageRepository
+                            .findFirstByDestinationDraftIdOrderBySortOrderAsc(draft.getId())
+                            .map(DestinationDraftImage::getImageUrl)
+                            .orElse(null)
+            );
+
+            // 🔹 creator info
+            userRepository.findById(draft.getCreatedBy())
+                    .ifPresent(user -> {
+                        dto.setCreatedByName(user.getUsername());
+                        dto.setCreatedByEmail(user.getEmail());
+                    });
+
+            return dto;
+        });
+    }
+
+    // =========================
+    // DRAFT DETAIL (ADMIN)
+    // =========================
+    public AdminDestinationDraftDetailDto getDraftDetail(Long draftId) {
+
+        DestinationDraft draft = draftRepository.findById(draftId)
+                .orElseThrow(() -> new RuntimeException("Draft not found"));
+
+        AdminDestinationDraftDetailDto dto = new AdminDestinationDraftDetailDto();
+
+        dto.setId(draft.getId());
+        dto.setName(draft.getName());
+        dto.setShortDescription(draft.getShortDescription());
+        dto.setFullDescription(draft.getFullDescription());
+        dto.setAddress(draft.getAddress());
+        dto.setPincode(draft.getPincode());
+        dto.setLatitude(draft.getLatitude());
+        dto.setLongitude(draft.getLongitude());
+        dto.setYoutubeVideoUrl(draft.getYoutubeVideoUrl());
+        dto.setStatus(draft.getStatus());
+        dto.setAdminRemark(draft.getAdminRemark());
+        dto.setCreatedAt(draft.getCreatedAt());
+        dto.setReviewedAt(draft.getReviewedAt());
+
+        dto.setStateId(draft.getStateId());
+
+        stateRepository.findById(draft.getStateId())
+                .ifPresent(state -> dto.setStateName(state.getName()));
+
+        // 🔹 ALL images
+        List<String> images =
+                draftImageRepository
+                        .findFirstByDestinationDraftIdOrderBySortOrderAsc(draftId)
+                        .stream()
+                        .map(DestinationDraftImage::getImageUrl)
+                        .toList();
+
+        dto.setImages(images);
+
+        // 🔹 created by
+        userRepository.findById(draft.getCreatedBy())
+                .ifPresent(user -> {
+                    dto.setCreatedByName(user.getUsername());
+                    dto.setCreatedByEmail(user.getEmail());
+                });
+
+        // 🔹 reviewed by (future safe)
+        if (draft.getReviewedBy() != null) {
+            userRepository.findById(draft.getReviewedBy())
+                    .ifPresent(user ->
+                            dto.setReviewedByName(user.getUsername()));
         }
 
-        return draftRepository.findByStatus(
-                status.toUpperCase(),
-                pageable);
+        return dto;
     }
 
     // =========================
@@ -73,7 +162,6 @@ public class AdminDestinationService {
             throw new RuntimeException("Draft already processed");
         }
 
-        // 1️⃣ Create destination
         Destination destination = new Destination();
         destination.setStateId(draft.getStateId());
         destination.setName(draft.getName());
@@ -81,6 +169,7 @@ public class AdminDestinationService {
         destination.setFullDescription(draft.getFullDescription());
         destination.setAddress(draft.getAddress());
         destination.setPincode(draft.getPincode());
+
         destination.setLatitude(
                 draft.getLatitude() != null
                         ? BigDecimal.valueOf(draft.getLatitude())
@@ -90,13 +179,15 @@ public class AdminDestinationService {
                 draft.getLongitude() != null
                         ? BigDecimal.valueOf(draft.getLongitude())
                         : null);
+
         destination.setYoutubeVideoUrl(draft.getYoutubeVideoUrl());
         destination.setActive(true);
 
         destinationRepository.save(destination);
 
-        // 2️⃣ Copy images
-        List<DestinationDraftImage> draftImages = draftImageRepository.findByDestinationDraftId(draftId);
+        // 🔹 copy images
+        List<DestinationDraftImage> draftImages =
+                draftImageRepository.findByDestinationDraftId(draftId);
 
         boolean coverSet = false;
 
@@ -109,7 +200,6 @@ public class AdminDestinationService {
 
             destinationImageRepository.save(image);
 
-            // 3️⃣ Auto cover = first image
             if (!coverSet) {
                 destination.setCoverImageUrl(dImg.getImageUrl());
                 coverSet = true;
@@ -118,8 +208,8 @@ public class AdminDestinationService {
 
         destinationRepository.save(destination);
 
-        // 4️⃣ Update draft status
         draft.setStatus("APPROVED");
+        draft.setReviewedBy(adminId);
         draftRepository.save(draft);
     }
 
@@ -136,8 +226,8 @@ public class AdminDestinationService {
             throw new RuntimeException("Draft already processed");
         }
 
-        // (optional: store reason later)
         draft.setStatus("REJECTED");
+        draft.setAdminRemark(reason);
         draftRepository.save(draft);
     }
 }
