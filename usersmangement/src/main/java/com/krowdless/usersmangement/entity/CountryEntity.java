@@ -10,9 +10,16 @@ public class CountryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
     private String code;
+
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    // -------- getters & setters --------
 
     public Long getId() {
         return id;
@@ -38,6 +45,11 @@ public class CountryEntity {
         this.code = code;
     }
 
-    // getters & setters
-    
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 }
