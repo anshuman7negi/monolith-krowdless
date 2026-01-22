@@ -3,6 +3,7 @@ package com.krowdless.usersmangement.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.krowdless.usersmangement.entity.*;
@@ -24,6 +25,7 @@ public class MasterDataService {
         return countryRepo.findAll();
     }
 
+    @Cacheable("states")
     public List<StateEntity> getStatesByCountry(Long countryId) {
         return stateRepo.findByCountryId(countryId);
     }

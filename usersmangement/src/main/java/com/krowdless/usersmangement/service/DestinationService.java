@@ -4,6 +4,7 @@ import com.krowdless.usersmangement.dto.DestinationDetailDto;
 import com.krowdless.usersmangement.dto.DestinationListDto;
 import com.krowdless.usersmangement.entity.Destination;
 import com.krowdless.usersmangement.entity.StateEntity;
+import com.krowdless.usersmangement.repository.DestinationDraftRepository;
 import com.krowdless.usersmangement.repository.DestinationImageRepository;
 import com.krowdless.usersmangement.repository.DestinationRepository;
 import com.krowdless.usersmangement.repository.StateRepository;
