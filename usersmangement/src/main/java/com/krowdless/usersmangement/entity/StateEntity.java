@@ -10,13 +10,21 @@ public class StateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(name = "image_url")
     private String imageUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "country_id")
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    // ✅ MASTER DATA RELATION (OK to keep)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id", nullable = false)
     private CountryEntity country;
+
+    // -------- getters & setters --------
 
     public Long getId() {
         return id;
@@ -42,6 +50,14 @@ public class StateEntity {
         this.imageUrl = imageUrl;
     }
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
     public CountryEntity getCountry() {
         return country;
     }
@@ -49,7 +65,4 @@ public class StateEntity {
     public void setCountry(CountryEntity country) {
         this.country = country;
     }
-
-    // getters & setters
-    
 }
