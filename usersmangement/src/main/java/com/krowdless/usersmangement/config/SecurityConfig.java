@@ -19,78 +19,80 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
+        @Autowired
+        private JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http)
+                        throws Exception {
 
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                http
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
+                                .authorizeHttpRequests(auth -> auth
 
-                        // ✅ PRE-FLIGHT
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                // ✅ PRE-FLIGHT
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ✅ PUBLIC ENDPOINTS
-                        .requestMatchers(
-                                "/users/login",
-                                "/users/register",
-                                "/users/refresh",
-                                "/users/ping",
-                                "/actuator/**",
-                                "/master/**",
+                                                // ✅ PUBLIC ENDPOINTS
+                                                .requestMatchers(
+                                                                "/users/login",
+                                                                "/users/register",
+                                                                "/users/refresh",
+                                                                "/users/ping",
+                                                                "/actuator/**",
+                                                                "/master/**",
 
-                                // ✅ PUBLIC DESTINATION APIs
-                                "/api/destinations",
-                                "/api/destinations/**")
-                        .permitAll()
+                                                                // ✅ PUBLIC DESTINATION APIs
+                                                                "/api/destinations",
+                                                                "/api/destinations/**")
+                                                .permitAll()
 
-                        // 🔐 USER SELF APIs (JWT REQUIRED)
-                        .requestMatchers("/users/me/**").authenticated()
+                                                // 🔐 USER SELF APIs (JWT REQUIRED)
+                                                .requestMatchers("/users/me/**").authenticated()
 
-                        // 🔒 EVERYTHING ELSE
-                        .anyRequest().authenticated());
+                                                // 🔒 EVERYTHING ELSE
+                                                .anyRequest().authenticated());
 
-        http.addFilterBefore(
-                jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class);
+                http.addFilterBefore(
+                                jwtAuthFilter,
+                                UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration config = new CorsConfiguration();
 
-        // ✅ FRONTEND ORIGINS
-        config.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "https://*.railway.app",
-                "https://krowdless.onrender.com"));
+                // ✅ FRONTEND ORIGINS
+                config.setAllowedOriginPatterns(List.of(
+                                "http://localhost:*",
+                                "https://*.railway.app",
+                                "https://krowdless.onrender.com",
+                                "https://demo-krowdless.onrender.com"));
 
-        config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedMethods(List.of(
+                                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        config.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type"));
+                config.setAllowedHeaders(List.of(
+                                "Authorization",
+                                "Content-Type"));
 
-        config.setAllowCredentials(true);
+                config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", config);
 
-        return source;
-    }
+                return source;
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 }
