@@ -13,6 +13,7 @@ public class DestinationListDto {
     private Integer price;
     private String crowdLevel;
     
+    
     public Long getId() {
         return id;
     }

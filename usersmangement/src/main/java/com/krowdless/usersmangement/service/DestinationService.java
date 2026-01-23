@@ -3,13 +3,15 @@ package com.krowdless.usersmangement.service;
 import com.krowdless.usersmangement.dto.DestinationDetailDto;
 import com.krowdless.usersmangement.dto.DestinationListDto;
 import com.krowdless.usersmangement.entity.Destination;
+import com.krowdless.usersmangement.entity.DestinationCrowd;
 import com.krowdless.usersmangement.entity.StateEntity;
-import com.krowdless.usersmangement.repository.DestinationDraftRepository;
+import com.krowdless.usersmangement.repository.DestinationCrowdRepository;
 import com.krowdless.usersmangement.repository.DestinationImageRepository;
 import com.krowdless.usersmangement.repository.DestinationRepository;
 import com.krowdless.usersmangement.repository.StateRepository;
 import com.krowdless.usersmangement.specification.DestinationSpecification;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,14 +25,45 @@ public class DestinationService {
         private final DestinationRepository destinationRepository;
         private final DestinationImageRepository destinationImageRepository;
         private final StateRepository stateRepository;
+        private final DestinationCrowdRepository destinationCrowdRepository;
 
         public DestinationService(
                         DestinationRepository destinationRepository,
                         DestinationImageRepository destinationImageRepository,
-                        StateRepository stateRepository) {
+                        StateRepository stateRepository,
+                        DestinationCrowdRepository destinationCrowdRepository) {
+
                 this.destinationRepository = destinationRepository;
                 this.destinationImageRepository = destinationImageRepository;
                 this.stateRepository = stateRepository;
+                this.destinationCrowdRepository = destinationCrowdRepository;
+        }
+
+        /*
+         * =================================================
+         * COMMON CROWD HELPERS
+         * =================================================
+         */
+
+        private Map<Long, String> getCrowdMap(List<Long> destinationIds) {
+
+                if (destinationIds == null || destinationIds.isEmpty()) {
+                        return Collections.emptyMap();
+                }
+
+                return destinationCrowdRepository
+                                .findByDestinationIdIn(destinationIds)
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                DestinationCrowd::getDestinationId,
+                                                DestinationCrowd::getCrowdLevel));
+        }
+
+        private String getCrowdLevel(Long destinationId) {
+                return destinationCrowdRepository
+                                .findById(destinationId)
+                                .map(DestinationCrowd::getCrowdLevel)
+                                .orElse("UNKNOWN");
         }
 
         /*
@@ -41,6 +74,7 @@ public class DestinationService {
         public Page<DestinationListDto> searchDestinations(
                         Long stateId,
                         String name,
+                        Long categoryId, // 👈 CATEGORY FILTER
                         int page,
                         int size) {
 
@@ -49,18 +83,32 @@ public class DestinationService {
                                 size,
                                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
+                // 🔥 CATEGORY FILTER SPECIFICATION INCLUDED
                 Page<Destination> destinations = destinationRepository.findAll(
-                                DestinationSpecification.filter(stateId, name),
+                                DestinationSpecification.filter(stateId, name, categoryId),
                                 pageable);
 
-                Map<Long, String> stateMap = stateRepository.findByActiveTrueOrderByNameAsc()
+                /* ---------- State Map ---------- */
+                Map<Long, String> stateMap = stateRepository
+                                .findByActiveTrueOrderByNameAsc()
                                 .stream()
                                 .collect(Collectors.toMap(
                                                 StateEntity::getId,
                                                 StateEntity::getName));
 
+                /* ---------- Crowd Map ---------- */
+                List<Long> destinationIds = destinations
+                                .stream()
+                                .map(Destination::getId)
+                                .toList();
+
+                Map<Long, String> crowdMap = getCrowdMap(destinationIds);
+
+                /* ---------- DTO Mapping ---------- */
                 return destinations.map(d -> {
+
                         DestinationListDto dto = new DestinationListDto();
+
                         dto.setId(d.getId());
                         dto.setName(d.getName());
                         dto.setShortDescription(d.getShortDescription());
@@ -69,7 +117,9 @@ public class DestinationService {
 
                         dto.setRating(null);
                         dto.setPrice(null);
-                        dto.setCrowdLevel("MEDIUM");
+
+                        dto.setCrowdLevel(
+                                        crowdMap.getOrDefault(d.getId(), "UNKNOWN"));
 
                         return dto;
                 });
@@ -101,6 +151,7 @@ public class DestinationService {
                                 destination.getLatitude() != null
                                                 ? destination.getLatitude().doubleValue()
                                                 : null);
+
                 dto.setLongitude(
                                 destination.getLongitude() != null
                                                 ? destination.getLongitude().doubleValue()
@@ -108,7 +159,7 @@ public class DestinationService {
 
                 dto.setYoutubeVideoUrl(destination.getYoutubeVideoUrl());
 
-                // ✅ ALL images for slider (cover included automatically)
+                /* ---------- Images ---------- */
                 List<String> images = destinationImageRepository
                                 .findByDestinationIdOrderBySortOrderAsc(destinationId)
                                 .stream()
@@ -116,10 +167,12 @@ public class DestinationService {
                                 .toList();
 
                 dto.setImages(images);
+                dto.setTimings(List.of());
 
-                dto.setTimings(List.of()); // later
+                /* ---------- Crowd (COMMON) ---------- */
+                dto.setCrowdLevel(
+                                getCrowdLevel(destinationId));
 
                 return dto;
         }
-
 }

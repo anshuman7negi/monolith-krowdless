@@ -20,6 +20,7 @@ public class DestinationDetailDto {
     private String youtubeVideoUrl;
 
     private List<String> images;
+    private String crowdLevel;
 
     private List<DestinationTimingDto> timings; // next phase
 
@@ -119,7 +120,12 @@ public class DestinationDetailDto {
         this.timings = timings;
     }
 
-    // getters & setters
-    
-}
+    public String getCrowdLevel() {
+        return crowdLevel;
+    }
 
+    public void setCrowdLevel(String crowdLevel) {
+        this.crowdLevel = crowdLevel;
+    }
+
+}

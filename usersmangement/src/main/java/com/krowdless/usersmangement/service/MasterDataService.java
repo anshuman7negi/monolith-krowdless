@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
 import com.krowdless.usersmangement.entity.*;
 import com.krowdless.usersmangement.repository.*;
 
@@ -21,6 +20,9 @@ public class MasterDataService {
     @Autowired
     private TitleRepository titleRepo;
 
+    @Autowired
+    private CategoryRepository categoryRepo;
+
     public List<CountryEntity> getCountries() {
         return countryRepo.findAll();
     }
@@ -32,5 +34,10 @@ public class MasterDataService {
 
     public List<TitleEntity> getTitles() {
         return titleRepo.findAll();
+    }
+
+    @Cacheable("categories") // optional but recommended
+    public List<Category> getCategories() {
+        return categoryRepo.findByActiveTrueOrderByNameAsc();
     }
 }

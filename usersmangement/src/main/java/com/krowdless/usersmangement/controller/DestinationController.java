@@ -16,17 +16,23 @@ public class DestinationController {
         this.destinationService = destinationService;
     }
 
-    @GetMapping
-    public Page<DestinationListDto> searchDestinations(
-            @RequestParam(required = false) Long stateId,
-            @RequestParam(required = false) String name,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return destinationService.searchDestinations(
-                stateId, name, page, size
-        );
-    }
+@GetMapping
+public Page<DestinationListDto> searchDestinations(
+        @RequestParam(required = false) Long stateId,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) Long categoryId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+) {
+    return destinationService.searchDestinations(
+            stateId,
+            name,
+            categoryId, 
+            page,
+            size
+    );
+}
+
 
      @GetMapping("/{id}")
     public DestinationDetailDto getDestinationDetail(

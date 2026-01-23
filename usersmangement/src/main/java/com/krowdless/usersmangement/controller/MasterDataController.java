@@ -33,4 +33,9 @@ public class MasterDataController {
     public ApiResponse<List<TitleEntity>> getTitles() {
         return new ApiResponse<>("success", "Titles loaded", service.getTitles());
     }
+
+    @GetMapping("/categories")
+    public ApiResponse<List<Category>> getCategories() {
+        return new ApiResponse<>("success", "Categories loaded", service.getCategories());
+    }
 }
