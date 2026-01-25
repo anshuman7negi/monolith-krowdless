@@ -15,8 +15,6 @@ public class StayDraftMedia {
     @JoinColumn(name = "stay_draft_id", nullable = false)
     private StayDraft stayDraft;
 
-    @Column(name = "stay_draft_id", nullable = false)
-    private Long stayDraftId;
 
     @Column(name = "media_type")
     private String mediaType; // IMAGE / VIDEO
@@ -68,14 +66,6 @@ public class StayDraftMedia {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public Long getStayDraftId() {
-        return stayDraftId;
-    }
-
-    public void setStayDraftId(Long stayDraftId) {
-        this.stayDraftId = stayDraftId;
     }
 
     public Integer getSortOrder() {
