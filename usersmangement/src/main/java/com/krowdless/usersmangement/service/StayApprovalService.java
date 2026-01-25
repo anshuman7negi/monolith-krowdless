@@ -127,7 +127,7 @@ public class StayApprovalService {
         stayPricingRepo.save(sp);
 
         // 6️⃣ COPY AMENITIES
-        List<StayDraftAmenity> draftAmenities = draftAmenityRepo.findByIdStayDraftId(draft.getId());
+        List<StayDraftAmenity> draftAmenities = draftAmenityRepo.findByStayDraftId(draft.getId());
 
         for (StayDraftAmenity da : draftAmenities) {
             StayAmenity sa = new StayAmenity();

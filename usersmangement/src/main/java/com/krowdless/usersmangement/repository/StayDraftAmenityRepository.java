@@ -10,8 +10,7 @@ import com.krowdless.usersmangement.entity.StayDraftAmenityId;
 public interface StayDraftAmenityRepository
                 extends JpaRepository<StayDraftAmenity, StayDraftAmenityId> {
 
-        // ✅ CORRECT for EmbeddedId
-    List<StayDraftAmenity> findByIdStayDraftId(Long stayDraftId);
+    List<StayDraftAmenity> findByStayDraftId(Long stayDraftId);
 
 
 }
