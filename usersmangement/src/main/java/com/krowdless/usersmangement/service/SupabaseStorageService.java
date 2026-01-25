@@ -176,4 +176,49 @@ public void deleteDestinationDraftImage(String imageUrl) {
 
 
 
+
+public String uploadStayDraftMedia(
+        Long draftId,
+        MultipartFile file,
+        String mediaType
+) {
+    try {
+        String ext = file.getOriginalFilename()
+                .substring(file.getOriginalFilename().lastIndexOf('.'));
+
+        String filePath =
+                "stay_drafts/draft_" + draftId + "/" +
+                mediaType.toLowerCase() + "_" +
+                System.currentTimeMillis() + ext;
+
+        String uploadUrl = supabaseUrl +
+                "/storage/v1/object/" + bucket + "/" + filePath;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + serviceRoleKey);
+        headers.set("apikey", serviceRoleKey);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        HttpEntity<byte[]> request =
+                new HttpEntity<>(file.getBytes(), headers);
+
+        restTemplate.exchange(
+                uploadUrl,
+                HttpMethod.PUT,
+                request,
+                String.class
+        );
+
+        return supabaseUrl +
+                "/storage/v1/object/public/" +
+                bucket + "/" + filePath;
+
+    } catch (Exception e) {
+        throw new RuntimeException("Stay draft media upload failed", e);
+    }
+}
+
+
+
+
 }
