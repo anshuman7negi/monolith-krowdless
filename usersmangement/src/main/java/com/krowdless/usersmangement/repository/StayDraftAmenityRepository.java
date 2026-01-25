@@ -13,5 +13,5 @@ public interface StayDraftAmenityRepository
         // ✅ CORRECT for EmbeddedId
     List<StayDraftAmenity> findByIdStayDraftId(Long stayDraftId);
 
-        void deleteByIdStayDraftId(Long stayDraftId);
+
 }
