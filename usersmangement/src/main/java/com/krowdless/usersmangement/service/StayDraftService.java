@@ -317,9 +317,8 @@ public class StayDraftService {
 
     public StayDraftDetailDto getDraftDetail(Long draftId, Long hostUserId) {
 
-        StayDraft draft = repository
-                .findByIdAndHostUserId(draftId, hostUserId)
-                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
+        StayDraft draft = repository.findById(draftId)
+                .orElseThrow(() -> new RuntimeException("Draft not found"));
 
         StayDraftDetailDto dto = new StayDraftDetailDto();
 
@@ -355,14 +354,12 @@ public class StayDraftService {
         }
 
         // ================= MEDIA =================
-       List<StayDraftMedia> mediaList =
-        mediaRepository.findByStayDraftId(draftId)
+        List<StayDraftMedia> mediaList = mediaRepository.findByStayDraftId(draftId)
                 .stream()
                 .sorted(Comparator.comparing(
                         StayDraftMedia::getSortOrder,
                         Comparator.nullsLast(Integer::compareTo)))
                 .toList();
-
 
         dto.setImageUrls(
                 mediaList.stream()
