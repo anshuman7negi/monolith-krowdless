@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.krowdless.usersmangement.dto.AmenityDto;
 import com.krowdless.usersmangement.dto.ApiResponse;
 import com.krowdless.usersmangement.entity.*;
 import com.krowdless.usersmangement.service.MasterDataService;
@@ -37,5 +38,10 @@ public class MasterDataController {
     @GetMapping("/categories")
     public ApiResponse<List<Category>> getCategories() {
         return new ApiResponse<>("success", "Categories loaded", service.getCategories());
+    }
+
+    @GetMapping("/amenities")
+    public ApiResponse<List<AmenityDto>> getAllAmenities() {
+         return new ApiResponse<>("success", "Categories loaded", service.getAllAmenities());
     }
 }
