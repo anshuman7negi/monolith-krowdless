@@ -44,6 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 path.startsWith("/users/me/leaderboard") ||
                 path.startsWith("/api/destinations") ||
                 path.startsWith("/master") ||
+                path.startsWith("/api/stays") ||
                 "OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;

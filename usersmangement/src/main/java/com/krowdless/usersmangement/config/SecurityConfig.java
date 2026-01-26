@@ -49,7 +49,9 @@ public class SecurityConfig {
 
                                                                 // ✅ PUBLIC DESTINATION APIs
                                                                 "/api/destinations",
-                                                                "/api/destinations/**")
+                                                                "/api/destinations/**",
+                                                                "/api/stays",
+                                                                "/api/stays/**")
                                                 .permitAll()
 
                                                 // 🔐 USER SELF APIs (JWT REQUIRED)
