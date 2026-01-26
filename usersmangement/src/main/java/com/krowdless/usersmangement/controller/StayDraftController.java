@@ -9,14 +9,16 @@ import com.krowdless.usersmangement.dto.StayDraftRequest;
 import com.krowdless.usersmangement.dto.StayListDto;
 import com.krowdless.usersmangement.entity.StayDraft;
 import com.krowdless.usersmangement.service.StayDraftService;
-
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/stays/drafts")
 public class StayDraftController {
+
+    private static final Logger log = LoggerFactory.getLogger(StayDraftController.class);
 
     private final StayDraftService service;
 
@@ -31,6 +33,12 @@ public class StayDraftController {
             @RequestPart("images") List<MultipartFile> images,
             @RequestPart("video") MultipartFile video,
             @RequestParam Long hostUserId) {
+
+        log.info("create-with-media called for hostUserId={}", hostUserId);
+        log.info("📦 Images count={}, Video present={}",
+                images != null ? images.size() : 0,
+                video != null && !video.isEmpty());
+
         // 1️⃣ Create draft
         StayDraft draft = service.createDraft(request, hostUserId);
 
@@ -41,6 +49,7 @@ public class StayDraftController {
             }
 
             for (MultipartFile image : images) {
+                log.info("Uploading image: {}", image.getOriginalFilename());
                 service.uploadDraftMedia(
                         draft.getId(),
                         image,
@@ -54,12 +63,14 @@ public class StayDraftController {
             throw new RuntimeException("Video is mandatory");
         }
 
+        log.info("Uploading video: {}", video.getOriginalFilename());
         service.uploadDraftMedia(
                 draft.getId(),
                 video,
                 "VIDEO",
                 hostUserId);
 
+        log.info("✅ create-with-media completed for draftId={}", draft.getId());
         return draft;
     }
 

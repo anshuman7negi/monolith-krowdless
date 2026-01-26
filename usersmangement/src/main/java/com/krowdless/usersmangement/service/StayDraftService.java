@@ -1,5 +1,7 @@
 package com.krowdless.usersmangement.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 @Service
 public class StayDraftService {
 
+    private static final Logger log = LoggerFactory.getLogger(StayDraftService.class);
+
     private final StayDraftRepository repository;
     private final StayDraftMediaRepository mediaRepository;
     private final StayDraftCapacityRepository capacityRepo;
@@ -66,6 +70,9 @@ public class StayDraftService {
     @Transactional
     public StayDraft createDraft(StayDraftRequest request, Long hostUserId) {
 
+        log.info("createDraft started for hostUserId={}", hostUserId);
+        log.info("Request payload: {}", request);
+
         StayDraft draft = new StayDraft();
         draft.setHostUserId(hostUserId);
         draft.setTitle(request.getTitle());
@@ -82,6 +89,8 @@ public class StayDraftService {
 
         repository.save(draft);
 
+        log.info("Draft saved with id={}", draft.getId());
+
         // capacity
         StayDraftCapacity capacity = new StayDraftCapacity();
         capacity.setStayDraftId(draft.getId());
@@ -91,6 +100,8 @@ public class StayDraftService {
         capacity.setBathrooms(request.getBathrooms());
         capacityRepo.save(capacity);
 
+        log.info("Capacity saved for draftId={}", draft.getId());
+
         // pricing
         StayDraftPricing pricing = new StayDraftPricing();
         pricing.setStayDraftId(draft.getId());
@@ -99,8 +110,26 @@ public class StayDraftService {
         pricing.setMaxNights(30);
         pricingRepo.save(pricing);
 
+        log.info("💰 Pricing saved for draftId={}", draft.getId());
+
+        // ================= AMENITIES =================
+        if (request.getAmenities() != null && !request.getAmenities().isEmpty()) {
+            for (String code : request.getAmenities()) {
+                StayDraftAmenity a = new StayDraftAmenity();
+                a.setStayDraftId(draft.getId());
+                a.setAmenityCode(code);
+                stayDraftAmenityRepo.save(a);
+                log.info("Amenity {} added to draftId={}", code, draft.getId());
+            }
+        } else {
+            log.warn("No amenities provided for draftId={}", draft.getId());
+        }
+
+        log.info("createDraft completed for draftId={}", draft.getId());
         return draft;
     }
+
+
 
     // =========================
     // UPDATE DRAFT
