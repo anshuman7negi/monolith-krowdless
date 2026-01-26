@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import com.krowdless.usersmangement.dto.StayDraftDetailDto;
 import com.krowdless.usersmangement.dto.StayListDto;
 import com.krowdless.usersmangement.service.StayService;
 
@@ -39,4 +40,12 @@ public class StayController {
                 page,
                 size);
     }
+
+    @GetMapping("/{stayId}/detail")
+    public StayDraftDetailDto getStayDetail(
+            @PathVariable Long stayId) {
+
+        return stayService.getStayDetail(stayId);
+    }
+
 }
