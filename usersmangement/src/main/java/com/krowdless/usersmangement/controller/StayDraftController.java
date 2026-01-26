@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.krowdless.usersmangement.dto.StayDraftDetailDto;
 import com.krowdless.usersmangement.dto.StayDraftRequest;
 import com.krowdless.usersmangement.dto.StayListDto;
 import com.krowdless.usersmangement.entity.StayDraft;
@@ -96,6 +97,14 @@ public class StayDraftController {
                 toDate,
                 page,
                 size);
+    }
+
+    @GetMapping("/{draftId}/detail")
+    public StayDraftDetailDto getDraftDetail(
+            @PathVariable Long draftId,
+            @RequestParam Long hostUserId) {
+
+        return service.getDraftDetail(draftId, hostUserId);
     }
 
 }

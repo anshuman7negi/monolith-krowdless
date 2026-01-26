@@ -6,12 +6,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.krowdless.usersmangement.dto.AmenityDto;
+import com.krowdless.usersmangement.dto.StayDraftDetailDto;
 import com.krowdless.usersmangement.dto.StayDraftRequest;
 import com.krowdless.usersmangement.dto.StayListDto;
 import com.krowdless.usersmangement.entity.StayDraft;
+import com.krowdless.usersmangement.entity.StayDraftAmenity;
 import com.krowdless.usersmangement.entity.StayDraftCapacity;
 import com.krowdless.usersmangement.entity.StayDraftMedia;
 import com.krowdless.usersmangement.entity.StayDraftPricing;
+import com.krowdless.usersmangement.repository.AmenityMasterRepository;
+import com.krowdless.usersmangement.repository.StayDraftAmenityRepository;
 import com.krowdless.usersmangement.repository.StayDraftCapacityRepository;
 import com.krowdless.usersmangement.repository.StayDraftMediaRepository;
 import com.krowdless.usersmangement.repository.StayDraftPricingRepository;
@@ -19,8 +25,8 @@ import com.krowdless.usersmangement.repository.StayDraftRepository;
 import com.krowdless.usersmangement.specification.StayDraftSpecification;
 import jakarta.transaction.Transactional;
 
-
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,18 +39,24 @@ public class StayDraftService {
     private final StayDraftCapacityRepository capacityRepo;
     private final StayDraftPricingRepository pricingRepo;
     private final SupabaseStorageService storageService;
+    private final StayDraftAmenityRepository stayDraftAmenityRepo;
+    private final AmenityMasterRepository amenityMasterRepo;
 
     public StayDraftService(
             StayDraftRepository repository,
             StayDraftMediaRepository mediaRepository,
             StayDraftCapacityRepository capacityRepo,
             StayDraftPricingRepository pricingRepo,
+            StayDraftAmenityRepository stayDraftAmenityRepo,
+            AmenityMasterRepository amenityMasterRepo,
             SupabaseStorageService storageService) {
 
         this.repository = repository;
         this.mediaRepository = mediaRepository;
         this.capacityRepo = capacityRepo;
         this.pricingRepo = pricingRepo;
+        this.stayDraftAmenityRepo = stayDraftAmenityRepo;
+        this.amenityMasterRepo = amenityMasterRepo;
         this.storageService = storageService;
     }
 
@@ -302,4 +314,88 @@ public class StayDraftService {
             throw new RuntimeException("Exactly 1 video is mandatory");
         }
     }
+
+    public StayDraftDetailDto getDraftDetail(Long draftId, Long hostUserId) {
+
+        StayDraft draft = repository
+                .findByIdAndHostUserId(draftId, hostUserId)
+                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
+
+        StayDraftDetailDto dto = new StayDraftDetailDto();
+
+        // ================= BASIC =================
+        dto.setId(draft.getId());
+        dto.setTitle(draft.getTitle());
+        dto.setDescription(draft.getDescription());
+        dto.setFullAddress(draft.getFullAddress());
+        dto.setPropertyType(draft.getPropertyType());
+        dto.setStatus(draft.getStatus());
+
+        // ================= CAPACITY =================
+        StayDraftCapacity cap = capacityRepo
+                .findById(draftId)
+                .orElse(null);
+
+        if (cap != null) {
+            dto.setMaxGuests(cap.getMaxGuests());
+            dto.setBedrooms(cap.getBedrooms());
+            dto.setBeds(cap.getBeds());
+            dto.setBathrooms(cap.getBathrooms());
+        }
+
+        // ================= PRICING =================
+        StayDraftPricing price = pricingRepo
+                .findById(draftId)
+                .orElse(null);
+
+        if (price != null) {
+            dto.setPricePerNight(price.getPricePerNight());
+            dto.setMinNights(price.getMinNights());
+            dto.setMaxNights(price.getMaxNights());
+        }
+
+        // ================= MEDIA =================
+       List<StayDraftMedia> mediaList =
+        mediaRepository.findByStayDraftId(draftId)
+                .stream()
+                .sorted(Comparator.comparing(
+                        StayDraftMedia::getSortOrder,
+                        Comparator.nullsLast(Integer::compareTo)))
+                .toList();
+
+
+        dto.setImageUrls(
+                mediaList.stream()
+                        .filter(m -> "IMAGE".equals(m.getMediaType()))
+                        .map(StayDraftMedia::getMediaUrl)
+                        .toList());
+
+        dto.setVideoUrl(
+                mediaList.stream()
+                        .filter(m -> "VIDEO".equals(m.getMediaType()))
+                        .map(StayDraftMedia::getMediaUrl)
+                        .findFirst()
+                        .orElse(null));
+
+        // ================= AMENITIES =================
+        var amenityCodes = stayDraftAmenityRepo.findByStayDraftId(draftId)
+                .stream()
+                .map(StayDraftAmenity::getAmenityCode)
+                .toList();
+
+        dto.setAmenities(
+                amenityMasterRepo.findAllById(amenityCodes)
+                        .stream()
+                        .map(a -> {
+                            AmenityDto ad = new AmenityDto();
+                            ad.setCode(a.getCode());
+                            ad.setLabel(a.getLabel());
+                            ad.setIcon(a.getIcon());
+                            return ad;
+                        })
+                        .toList());
+
+        return dto;
+    }
+
 }
