@@ -1,6 +1,8 @@
 package com.krowdless.usersmangement.controller;
 
 import com.krowdless.usersmangement.service.BookingService;
+import com.krowdless.usersmangement.util.SecurityUtil;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +22,12 @@ public class BookingController {
     @PostMapping("/create")
     public ResponseEntity<?> createBooking(
             @RequestParam Long stayId,
-            @RequestParam Long userId,
             @RequestParam String checkInDate,
             @RequestParam String checkOutDate,
             @RequestParam int guests,
             @RequestParam double pricePerNight) {
+
+        Long userId = SecurityUtil.getCurrentUserId();
 
         Long bookingId = bookingService.createBooking(
                 stayId,
