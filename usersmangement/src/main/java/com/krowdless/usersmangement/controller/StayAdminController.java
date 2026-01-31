@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.krowdless.usersmangement.entity.Stay;
 import com.krowdless.usersmangement.service.StayApprovalService;
+import com.krowdless.usersmangement.util.SecurityUtil;
 
 @RestController
 @RequestMapping("/api/admin/stays")
@@ -19,10 +20,10 @@ public class StayAdminController {
     @PostMapping("/{stayDraftId}/approve")
     public Stay approveDraft(
             @PathVariable Long stayDraftId,
-            @RequestParam Long adminUserId,
             @RequestParam(required = false) String notes
     ) {
-        return approvalService.approveDraft(stayDraftId, adminUserId, notes);
+        Long userId = SecurityUtil.getCurrentUserId();
+        return approvalService.approveDraft(stayDraftId, userId, notes);
     }
 
     // ❌ Reject draft
