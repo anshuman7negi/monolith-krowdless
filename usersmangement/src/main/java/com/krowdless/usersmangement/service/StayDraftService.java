@@ -36,392 +36,393 @@ import java.util.stream.Collectors;
 @Service
 public class StayDraftService {
 
-    private static final Logger log = LoggerFactory.getLogger(StayDraftService.class);
+        private static final Logger log = LoggerFactory.getLogger(StayDraftService.class);
 
-    private final StayDraftRepository repository;
-    private final StayDraftMediaRepository mediaRepository;
-    private final StayDraftCapacityRepository capacityRepo;
-    private final StayDraftPricingRepository pricingRepo;
-    private final SupabaseStorageService storageService;
-    private final StayDraftAmenityRepository stayDraftAmenityRepo;
-    private final AmenityMasterRepository amenityMasterRepo;
+        private final StayDraftRepository repository;
+        private final StayDraftMediaRepository mediaRepository;
+        private final StayDraftCapacityRepository capacityRepo;
+        private final StayDraftPricingRepository pricingRepo;
+        private final SupabaseStorageService storageService;
+        private final StayDraftAmenityRepository stayDraftAmenityRepo;
+        private final AmenityMasterRepository amenityMasterRepo;
 
-    public StayDraftService(
-            StayDraftRepository repository,
-            StayDraftMediaRepository mediaRepository,
-            StayDraftCapacityRepository capacityRepo,
-            StayDraftPricingRepository pricingRepo,
-            StayDraftAmenityRepository stayDraftAmenityRepo,
-            AmenityMasterRepository amenityMasterRepo,
-            SupabaseStorageService storageService) {
+        public StayDraftService(
+                        StayDraftRepository repository,
+                        StayDraftMediaRepository mediaRepository,
+                        StayDraftCapacityRepository capacityRepo,
+                        StayDraftPricingRepository pricingRepo,
+                        StayDraftAmenityRepository stayDraftAmenityRepo,
+                        AmenityMasterRepository amenityMasterRepo,
+                        SupabaseStorageService storageService) {
 
-        this.repository = repository;
-        this.mediaRepository = mediaRepository;
-        this.capacityRepo = capacityRepo;
-        this.pricingRepo = pricingRepo;
-        this.stayDraftAmenityRepo = stayDraftAmenityRepo;
-        this.amenityMasterRepo = amenityMasterRepo;
-        this.storageService = storageService;
-    }
-
-    // =========================
-    // CREATE DRAFT
-    // =========================
-    @Transactional
-    public StayDraft createDraft(StayDraftRequest request, Long hostUserId) {
-
-        log.info("createDraft started for hostUserId={}", hostUserId);
-        log.info("Request payload: {}", request);
-
-        StayDraft draft = new StayDraft();
-        draft.setHostUserId(hostUserId);
-        draft.setTitle(request.getTitle());
-        draft.setDescription(request.getDescription());
-        draft.setFullAddress(request.getFullAddress());
-        draft.setCountryId(request.getCountryId());
-        draft.setStateId(request.getStateId());
-        draft.setLatitude(request.getLatitude());
-        draft.setLongitude(request.getLongitude());
-        draft.setPropertyType(request.getPropertyType());
-        draft.setStatus("PENDING_REVIEW");
-        draft.setCreatedAt(OffsetDateTime.now());
-        draft.setUpdatedAt(OffsetDateTime.now());
-
-        repository.save(draft);
-
-        log.info("Draft saved with id={}", draft.getId());
-
-        // capacity
-        StayDraftCapacity capacity = new StayDraftCapacity();
-        capacity.setStayDraftId(draft.getId());
-        capacity.setMaxGuests(request.getMaxGuests());
-        capacity.setBedrooms(request.getBedrooms());
-        capacity.setBeds(request.getBeds());
-        capacity.setBathrooms(request.getBathrooms());
-        capacityRepo.save(capacity);
-
-        log.info("Capacity saved for draftId={}", draft.getId());
-
-        // pricing
-        StayDraftPricing pricing = new StayDraftPricing();
-        pricing.setStayDraftId(draft.getId());
-        pricing.setPricePerNight(request.getPricePerNight());
-        pricing.setMinNights(1);
-        pricing.setMaxNights(30);
-        pricingRepo.save(pricing);
-
-        log.info("💰 Pricing saved for draftId={}", draft.getId());
-
-        // ================= AMENITIES =================
-        if (request.getAmenities() != null && !request.getAmenities().isEmpty()) {
-            for (String code : request.getAmenities()) {
-                StayDraftAmenity a = new StayDraftAmenity();
-                a.setStayDraftId(draft.getId());
-                a.setAmenityCode(code);
-                stayDraftAmenityRepo.save(a);
-                log.info("Amenity {} added to draftId={}", code, draft.getId());
-            }
-        } else {
-            log.warn("No amenities provided for draftId={}", draft.getId());
+                this.repository = repository;
+                this.mediaRepository = mediaRepository;
+                this.capacityRepo = capacityRepo;
+                this.pricingRepo = pricingRepo;
+                this.stayDraftAmenityRepo = stayDraftAmenityRepo;
+                this.amenityMasterRepo = amenityMasterRepo;
+                this.storageService = storageService;
         }
 
-        log.info("createDraft completed for draftId={}", draft.getId());
-        return draft;
-    }
+        // =========================
+        // CREATE DRAFT
+        // =========================
+        @Transactional
+        public StayDraft createDraft(StayDraftRequest request, Long hostUserId) {
 
+                log.info("createDraft started for hostUserId={}", hostUserId);
+                log.info("Request payload: {}", request);
 
+                StayDraft draft = new StayDraft();
+                draft.setHostUserId(hostUserId);
+                draft.setTitle(request.getTitle());
+                draft.setDescription(request.getDescription());
+                draft.setFullAddress(request.getFullAddress());
+                draft.setCountryId(Long.valueOf(1));
+                draft.setStateId(request.getStateId());
+                draft.setLatitude(request.getLatitude());
+                draft.setLongitude(request.getLongitude());
+                draft.setPropertyType(request.getPropertyType());
+                draft.setStatus("PENDING_REVIEW");
+                draft.setCreatedAt(OffsetDateTime.now());
+                draft.setUpdatedAt(OffsetDateTime.now());
 
-    // =========================
-    // UPDATE DRAFT
-    // =========================
-    public StayDraft updateDraft(
-            Long draftId,
-            Long hostUserId,
-            StayDraftRequest request) {
+                repository.save(draft);
 
-        StayDraft draft = repository
-                .findByIdAndHostUserId(draftId, hostUserId)
-                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
+                log.info("Draft saved with id={}", draft.getId());
 
-        if (!"PENDING_REVIEW".equals(draft.getStatus())) {
-            throw new RuntimeException("Only pending drafts can be updated");
+                // capacity
+                StayDraftCapacity capacity = new StayDraftCapacity();
+                capacity.setStayDraftId(draft.getId());
+                capacity.setMaxGuests(request.getMaxGuests());
+                capacity.setBedrooms(request.getBedrooms());
+                capacity.setBeds(request.getBeds());
+                capacity.setBathrooms(request.getBathrooms());
+                capacityRepo.save(capacity);
+
+                log.info("Capacity saved for draftId={}", draft.getId());
+
+                // pricing
+                StayDraftPricing pricing = new StayDraftPricing();
+                pricing.setStayDraftId(draft.getId());
+                pricing.setPricePerNight(request.getPricePerNight());
+                pricing.setMinNights(1);
+                pricing.setMaxNights(30);
+                pricing.setCheckInTime(request.getCheckInTime());
+                pricing.setCheckOutTime(request.getCheckOutTime());
+
+                pricingRepo.save(pricing);
+
+                log.info("💰 Pricing saved for draftId={}", draft.getId());
+
+                // ================= AMENITIES =================
+                if (request.getAmenities() != null && !request.getAmenities().isEmpty()) {
+                        for (String code : request.getAmenities()) {
+                                StayDraftAmenity a = new StayDraftAmenity();
+                                a.setStayDraftId(draft.getId());
+                                a.setAmenityCode(code);
+                                stayDraftAmenityRepo.save(a);
+                                log.info("Amenity {} added to draftId={}", code, draft.getId());
+                        }
+                } else {
+                        log.warn("No amenities provided for draftId={}", draft.getId());
+                }
+
+                log.info("createDraft completed for draftId={}", draft.getId());
+                return draft;
         }
 
-        draft.setTitle(request.getTitle());
-        draft.setDescription(request.getDescription());
-        draft.setFullAddress(request.getFullAddress());
-        draft.setCountryId(request.getCountryId());
-        draft.setStateId(request.getStateId());
-        draft.setLatitude(request.getLatitude());
-        draft.setLongitude(request.getLongitude());
-        draft.setPropertyType(request.getPropertyType());
-        draft.setUpdatedAt(OffsetDateTime.now());
+        // =========================
+        // UPDATE DRAFT
+        // =========================
+        public StayDraft updateDraft(
+                        Long draftId,
+                        Long hostUserId,
+                        StayDraftRequest request) {
 
-        return repository.save(draft);
-    }
+                StayDraft draft = repository
+                                .findByIdAndHostUserId(draftId, hostUserId)
+                                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
 
-    // =========================
-    // GET MY DRAFTS
-    // =========================
-    public List<StayDraft> getMyDrafts(Long hostUserId) {
-        return repository.findByHostUserId(hostUserId);
-    }
+                if (!"PENDING_REVIEW".equals(draft.getStatus())) {
+                        throw new RuntimeException("Only pending drafts can be updated");
+                }
 
-    // =========================
-    // ADMIN – PENDING DRAFTS
-    // =========================
-    // =========================
-    // ADMIN – LIST DRAFT STAYS
-    // =========================
-    public Page<StayListDto> listDraftStays(
-            String status,
-            OffsetDateTime fromDate,
-            OffsetDateTime toDate,
-            int page,
-            int size) {
+                draft.setTitle(request.getTitle());
+                draft.setDescription(request.getDescription());
+                draft.setFullAddress(request.getFullAddress());
+                draft.setCountryId(request.getCountryId());
+                draft.setStateId(request.getStateId());
+                draft.setLatitude(request.getLatitude());
+                draft.setLongitude(request.getLongitude());
+                draft.setPropertyType(request.getPropertyType());
+                draft.setUpdatedAt(OffsetDateTime.now());
 
-        // 🔥 default status
-        if (status == null || status.isBlank()) {
-            status = "PENDING_REVIEW";
+                return repository.save(draft);
         }
 
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        Page<StayDraft> draftsPage = repository.findAll(
-                StayDraftSpecification.filter(
-                        status,
-                        fromDate,
-                        toDate),
-                pageable);
-
-        List<StayDraft> drafts = draftsPage.getContent();
-
-        if (drafts.isEmpty()) {
-            return draftsPage.map(d -> null);
+        // =========================
+        // GET MY DRAFTS
+        // =========================
+        public List<StayDraft> getMyDrafts(Long hostUserId) {
+                return repository.findByHostUserId(hostUserId);
         }
 
-        List<Long> draftIds = drafts.stream()
-                .map(StayDraft::getId)
-                .toList();
+        // =========================
+        // ADMIN – PENDING DRAFTS
+        // =========================
+        // =========================
+        // ADMIN – LIST DRAFT STAYS
+        // =========================
+        public Page<StayListDto> listDraftStays(
+                        String status,
+                        OffsetDateTime fromDate,
+                        OffsetDateTime toDate,
+                        int page,
+                        int size) {
 
-        // 🔹 capacity
-        Map<Long, StayDraftCapacity> capacityMap = capacityRepo.findByStayDraftIdIn(draftIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        StayDraftCapacity::getStayDraftId,
-                        c -> c));
+                // 🔥 default status
+                if (status == null || status.isBlank()) {
+                        status = "PENDING_REVIEW";
+                }
 
-        // 🔹 pricing
-        Map<Long, StayDraftPricing> pricingMap = pricingRepo.findByStayDraftIdIn(draftIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        StayDraftPricing::getStayDraftId,
-                        p -> p));
+                Pageable pageable = PageRequest.of(
+                                page,
+                                size,
+                                Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 🔹 cover image
-        Map<Long, String> coverImageMap = mediaRepository
-                .findByStayDraftIdInAndMediaTypeOrderBySortOrderAsc(
-                        draftIds, "IMAGE")
-                .stream()
-                .collect(Collectors.toMap(
-                        StayDraftMedia::getStayDraftId,
-                        StayDraftMedia::getMediaUrl,
-                        (first, ignore) -> first));
+                Page<StayDraft> draftsPage = repository.findAll(
+                                StayDraftSpecification.filter(
+                                                status,
+                                                fromDate,
+                                                toDate),
+                                pageable);
 
-        // 🔹 DTO MAP
-        return draftsPage.map(draft -> {
+                List<StayDraft> drafts = draftsPage.getContent();
 
-            StayListDto dto = new StayListDto();
+                if (drafts.isEmpty()) {
+                        return draftsPage.map(d -> null);
+                }
 
-            dto.setId(draft.getId());
-            dto.setTitle(draft.getTitle());
-            dto.setPropertyType(draft.getPropertyType());
-            dto.setStateName(
-                    draft.getStateId() != null
-                            ? String.valueOf(draft.getStateId())
-                            : null);
+                List<Long> draftIds = drafts.stream()
+                                .map(StayDraft::getId)
+                                .toList();
 
-            StayDraftCapacity cap = capacityMap.get(draft.getId());
-            if (cap != null) {
-                dto.setMaxGuests(cap.getMaxGuests());
-            }
+                // 🔹 capacity
+                Map<Long, StayDraftCapacity> capacityMap = capacityRepo.findByStayDraftIdIn(draftIds)
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                StayDraftCapacity::getStayDraftId,
+                                                c -> c));
 
-            StayDraftPricing price = pricingMap.get(draft.getId());
-            if (price != null) {
-                dto.setPricePerNight(price.getPricePerNight());
-            }
+                // 🔹 pricing
+                Map<Long, StayDraftPricing> pricingMap = pricingRepo.findByStayDraftIdIn(draftIds)
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                StayDraftPricing::getStayDraftId,
+                                                p -> p));
 
-            dto.setCoverImageUrl(
-                    coverImageMap.get(draft.getId()));
+                // 🔹 cover image
+                Map<Long, String> coverImageMap = mediaRepository
+                                .findByStayDraftIdInAndMediaTypeOrderBySortOrderAsc(
+                                                draftIds, "IMAGE")
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                StayDraftMedia::getStayDraftId,
+                                                StayDraftMedia::getMediaUrl,
+                                                (first, ignore) -> first));
 
-            return dto;
-        });
-    }
+                // 🔹 DTO MAP
+                return draftsPage.map(draft -> {
 
-    // =========================
-    // UPLOAD MEDIA (IMAGE / VIDEO)
-    // =========================
-    @Transactional
-    public void uploadDraftMedia(
-            Long draftId,
-            MultipartFile file,
-            String mediaType,
-            Long hostUserId) {
-        // 1️⃣ Draft + ownership check
-        StayDraft draft = repository
-                .findByIdAndHostUserId(draftId, hostUserId)
-                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
+                        StayListDto dto = new StayListDto();
 
-        if (!"PENDING_REVIEW".equals(draft.getStatus())) {
-            throw new RuntimeException("Cannot upload media to non-pending draft");
+                        dto.setId(draft.getId());
+                        dto.setTitle(draft.getTitle());
+                        dto.setPropertyType(draft.getPropertyType());
+                        dto.setStateName(
+                                        draft.getStateId() != null
+                                                        ? String.valueOf(draft.getStateId())
+                                                        : null);
+
+                        StayDraftCapacity cap = capacityMap.get(draft.getId());
+                        if (cap != null) {
+                                dto.setMaxGuests(cap.getMaxGuests());
+                        }
+
+                        StayDraftPricing price = pricingMap.get(draft.getId());
+                        if (price != null) {
+                                dto.setPricePerNight(price.getPricePerNight());
+                        }
+
+                        dto.setCoverImageUrl(
+                                        coverImageMap.get(draft.getId()));
+
+                        return dto;
+                });
         }
 
-        if (!"IMAGE".equals(mediaType) && !"VIDEO".equals(mediaType)) {
-            throw new RuntimeException("Invalid media type");
+        // =========================
+        // UPLOAD MEDIA (IMAGE / VIDEO)
+        // =========================
+        @Transactional
+        public void uploadDraftMedia(
+                        Long draftId,
+                        MultipartFile file,
+                        String mediaType,
+                        Long hostUserId) {
+                // 1️⃣ Draft + ownership check
+                StayDraft draft = repository
+                                .findByIdAndHostUserId(draftId, hostUserId)
+                                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
+
+                if (!"PENDING_REVIEW".equals(draft.getStatus())) {
+                        throw new RuntimeException("Cannot upload media to non-pending draft");
+                }
+
+                if (!"IMAGE".equals(mediaType) && !"VIDEO".equals(mediaType)) {
+                        throw new RuntimeException("Invalid media type");
+                }
+
+                // 2️⃣ Count existing media
+                List<StayDraftMedia> existingMedia = mediaRepository.findByStayDraftId(draftId);
+
+                long imageCount = existingMedia.stream()
+                                .filter(m -> "IMAGE".equals(m.getMediaType()))
+                                .count();
+
+                long videoCount = existingMedia.stream()
+                                .filter(m -> "VIDEO".equals(m.getMediaType()))
+                                .count();
+
+                // 3️⃣ Business rules
+                if ("IMAGE".equals(mediaType) && imageCount >= 5) {
+                        throw new RuntimeException("Maximum 5 images allowed");
+                }
+
+                if ("VIDEO".equals(mediaType) && videoCount >= 1) {
+                        throw new RuntimeException("Only 1 video is allowed");
+                }
+
+                // 4️⃣ Upload to Supabase
+                String mediaUrl = storageService.uploadStayDraftMedia(draftId, file, mediaType);
+
+                // 5️⃣ Save DB record
+                StayDraftMedia media = new StayDraftMedia();
+                media.setStayDraftId(draftId);
+                media.setMediaType(mediaType);
+                media.setMediaUrl(mediaUrl);
+                media.setCreatedAt(OffsetDateTime.now());
+
+                mediaRepository.save(media);
         }
 
-        // 2️⃣ Count existing media
-        List<StayDraftMedia> existingMedia = mediaRepository.findByStayDraftId(draftId);
+        // =========================
+        // VALIDATE BEFORE SUBMIT (ADMIN QUEUE)
+        // =========================
+        public void validateBeforeSubmit(Long draftId, Long hostUserId) {
 
-        long imageCount = existingMedia.stream()
-                .filter(m -> "IMAGE".equals(m.getMediaType()))
-                .count();
+                StayDraft draft = repository
+                                .findByIdAndHostUserId(draftId, hostUserId)
+                                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
 
-        long videoCount = existingMedia.stream()
-                .filter(m -> "VIDEO".equals(m.getMediaType()))
-                .count();
+                List<StayDraftMedia> mediaList = mediaRepository.findByStayDraftId(draftId);
 
-        // 3️⃣ Business rules
-        if ("IMAGE".equals(mediaType) && imageCount >= 5) {
-            throw new RuntimeException("Maximum 5 images allowed");
+                long imageCount = mediaList.stream()
+                                .filter(m -> "IMAGE".equals(m.getMediaType()))
+                                .count();
+
+                long videoCount = mediaList.stream()
+                                .filter(m -> "VIDEO".equals(m.getMediaType()))
+                                .count();
+
+                if (imageCount == 0) {
+                        throw new RuntimeException("At least 1 image is required");
+                }
+
+                if (videoCount != 1) {
+                        throw new RuntimeException("Exactly 1 video is mandatory");
+                }
         }
 
-        if ("VIDEO".equals(mediaType) && videoCount >= 1) {
-            throw new RuntimeException("Only 1 video is allowed");
+        public StayDraftDetailDto getDraftDetail(Long draftId, Long hostUserId) {
+
+                StayDraft draft = repository.findById(draftId)
+                                .orElseThrow(() -> new RuntimeException("Draft not found"));
+
+                StayDraftDetailDto dto = new StayDraftDetailDto();
+
+                // ================= BASIC =================
+                dto.setId(draft.getId());
+                dto.setTitle(draft.getTitle());
+                dto.setDescription(draft.getDescription());
+                dto.setFullAddress(draft.getFullAddress());
+                dto.setPropertyType(draft.getPropertyType());
+                dto.setStatus(draft.getStatus());
+
+                // ================= CAPACITY =================
+                StayDraftCapacity cap = capacityRepo
+                                .findById(draftId)
+                                .orElse(null);
+
+                if (cap != null) {
+                        dto.setMaxGuests(cap.getMaxGuests());
+                        dto.setBedrooms(cap.getBedrooms());
+                        dto.setBeds(cap.getBeds());
+                        dto.setBathrooms(cap.getBathrooms());
+                }
+
+                // ================= PRICING =================
+                StayDraftPricing price = pricingRepo
+                                .findById(draftId)
+                                .orElse(null);
+
+                if (price != null) {
+                        dto.setPricePerNight(price.getPricePerNight());
+                        dto.setMinNights(price.getMinNights());
+                        dto.setMaxNights(price.getMaxNights());
+                }
+
+                // ================= MEDIA =================
+                List<StayDraftMedia> mediaList = mediaRepository.findByStayDraftId(draftId)
+                                .stream()
+                                .sorted(Comparator.comparing(
+                                                StayDraftMedia::getSortOrder,
+                                                Comparator.nullsLast(Integer::compareTo)))
+                                .toList();
+
+                dto.setImageUrls(
+                                mediaList.stream()
+                                                .filter(m -> "IMAGE".equals(m.getMediaType()))
+                                                .map(StayDraftMedia::getMediaUrl)
+                                                .toList());
+
+                dto.setVideoUrl(
+                                mediaList.stream()
+                                                .filter(m -> "VIDEO".equals(m.getMediaType()))
+                                                .map(StayDraftMedia::getMediaUrl)
+                                                .findFirst()
+                                                .orElse(null));
+
+                // ================= AMENITIES =================
+                var amenityCodes = stayDraftAmenityRepo.findByStayDraftId(draftId)
+                                .stream()
+                                .map(StayDraftAmenity::getAmenityCode)
+                                .toList();
+
+                dto.setAmenities(
+                                amenityMasterRepo.findAllById(amenityCodes)
+                                                .stream()
+                                                .map(a -> {
+                                                        AmenityDto ad = new AmenityDto();
+                                                        ad.setCode(a.getCode());
+                                                        ad.setLabel(a.getLabel());
+                                                        ad.setIcon(a.getIcon());
+                                                        return ad;
+                                                })
+                                                .toList());
+
+                return dto;
         }
-
-        // 4️⃣ Upload to Supabase
-        String mediaUrl = storageService.uploadStayDraftMedia(draftId, file, mediaType);
-
-        // 5️⃣ Save DB record
-        StayDraftMedia media = new StayDraftMedia();
-        media.setStayDraftId(draftId);
-        media.setMediaType(mediaType);
-        media.setMediaUrl(mediaUrl);
-        media.setCreatedAt(OffsetDateTime.now());
-
-        mediaRepository.save(media);
-    }
-
-    // =========================
-    // VALIDATE BEFORE SUBMIT (ADMIN QUEUE)
-    // =========================
-    public void validateBeforeSubmit(Long draftId, Long hostUserId) {
-
-        StayDraft draft = repository
-                .findByIdAndHostUserId(draftId, hostUserId)
-                .orElseThrow(() -> new RuntimeException("Draft not found or unauthorized"));
-
-        List<StayDraftMedia> mediaList = mediaRepository.findByStayDraftId(draftId);
-
-        long imageCount = mediaList.stream()
-                .filter(m -> "IMAGE".equals(m.getMediaType()))
-                .count();
-
-        long videoCount = mediaList.stream()
-                .filter(m -> "VIDEO".equals(m.getMediaType()))
-                .count();
-
-        if (imageCount == 0) {
-            throw new RuntimeException("At least 1 image is required");
-        }
-
-        if (videoCount != 1) {
-            throw new RuntimeException("Exactly 1 video is mandatory");
-        }
-    }
-
-    public StayDraftDetailDto getDraftDetail(Long draftId, Long hostUserId) {
-
-        StayDraft draft = repository.findById(draftId)
-                .orElseThrow(() -> new RuntimeException("Draft not found"));
-
-        StayDraftDetailDto dto = new StayDraftDetailDto();
-
-        // ================= BASIC =================
-        dto.setId(draft.getId());
-        dto.setTitle(draft.getTitle());
-        dto.setDescription(draft.getDescription());
-        dto.setFullAddress(draft.getFullAddress());
-        dto.setPropertyType(draft.getPropertyType());
-        dto.setStatus(draft.getStatus());
-
-        // ================= CAPACITY =================
-        StayDraftCapacity cap = capacityRepo
-                .findById(draftId)
-                .orElse(null);
-
-        if (cap != null) {
-            dto.setMaxGuests(cap.getMaxGuests());
-            dto.setBedrooms(cap.getBedrooms());
-            dto.setBeds(cap.getBeds());
-            dto.setBathrooms(cap.getBathrooms());
-        }
-
-        // ================= PRICING =================
-        StayDraftPricing price = pricingRepo
-                .findById(draftId)
-                .orElse(null);
-
-        if (price != null) {
-            dto.setPricePerNight(price.getPricePerNight());
-            dto.setMinNights(price.getMinNights());
-            dto.setMaxNights(price.getMaxNights());
-        }
-
-        // ================= MEDIA =================
-        List<StayDraftMedia> mediaList = mediaRepository.findByStayDraftId(draftId)
-                .stream()
-                .sorted(Comparator.comparing(
-                        StayDraftMedia::getSortOrder,
-                        Comparator.nullsLast(Integer::compareTo)))
-                .toList();
-
-        dto.setImageUrls(
-                mediaList.stream()
-                        .filter(m -> "IMAGE".equals(m.getMediaType()))
-                        .map(StayDraftMedia::getMediaUrl)
-                        .toList());
-
-        dto.setVideoUrl(
-                mediaList.stream()
-                        .filter(m -> "VIDEO".equals(m.getMediaType()))
-                        .map(StayDraftMedia::getMediaUrl)
-                        .findFirst()
-                        .orElse(null));
-
-        // ================= AMENITIES =================
-        var amenityCodes = stayDraftAmenityRepo.findByStayDraftId(draftId)
-                .stream()
-                .map(StayDraftAmenity::getAmenityCode)
-                .toList();
-
-        dto.setAmenities(
-                amenityMasterRepo.findAllById(amenityCodes)
-                        .stream()
-                        .map(a -> {
-                            AmenityDto ad = new AmenityDto();
-                            ad.setCode(a.getCode());
-                            ad.setLabel(a.getLabel());
-                            ad.setIcon(a.getIcon());
-                            return ad;
-                        })
-                        .toList());
-
-        return dto;
-    }
 
 }
