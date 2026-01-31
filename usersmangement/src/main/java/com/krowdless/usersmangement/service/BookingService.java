@@ -205,15 +205,29 @@ public class BookingService {
                 .findById(stay.getId())
                 .orElse(null);
 
-        // 5️⃣ Cover image (first IMAGE)
-        String coverImage = stayMediaRepository
+        /* ================= MEDIA (LIKE STAY DETAIL) ================= */
+
+        // 🔹 Images
+        List<StayMedia> imageMedia = stayMediaRepository
                 .findByStayIdInAndMediaTypeOrderBySortOrderAsc(
                         List.of(stay.getId()),
-                        "IMAGE")
-                .stream()
-                .findFirst()
+                        "IMAGE");
+
+        List<String> images = imageMedia.stream()
                 .map(StayMedia::getMediaUrl)
+                .toList();
+
+        // 🔹 Video (first one only)
+        String videoUrl = stayMediaRepository
+                .findByStayIdInAndMediaTypeOrderBySortOrderAsc(
+                        List.of(stay.getId()),
+                        "VIDEO")
+                .stream()
+                .map(StayMedia::getMediaUrl)
+                .findFirst()
                 .orElse(null);
+
+        /* ================= DTO ================= */
 
         BookingDetailDto dto = new BookingDetailDto();
 
@@ -227,7 +241,9 @@ public class BookingService {
         dto.setStayTitle(stay.getTitle());
         dto.setStayAddress(stay.getFullAddress());
         dto.setPropertyType(stay.getPropertyType());
-        dto.setStayImageUrl(coverImage);
+
+        dto.setImages(images); // ✅ ALL IMAGES
+        dto.setVideoUrl(videoUrl); // ✅ HERO VIDEO
 
         // ===== DATES =====
         dto.setCheckInDate(booking.getCheckInDate());

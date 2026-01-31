@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
+import java.util.List;
+
 public class BookingDetailDto {
 
     // ===== BASIC =====
@@ -14,9 +16,12 @@ public class BookingDetailDto {
     // ===== STAY =====
     private Long stayId;
     private String stayTitle;
-    private String stayImageUrl;
     private String stayAddress;
     private String propertyType;
+
+    /* 🔥 MEDIA */
+    private List<String> images;
+    private String videoUrl;
 
     // ===== TRIP =====
     private LocalDate checkInDate;
@@ -40,16 +45,7 @@ public class BookingDetailDto {
     private String paymentMethod;
     private String transactionId;
 
-    // ===== HOST =====
-    private Long hostId;
-    private String hostName;
-    private String hostProfileImage;
-    private boolean hostVerified;
-
-    // ===== CANCELLATION =====
-    private boolean cancelled;
-    private String cancelledBy;
-    private double refundAmount;
+    // getters / setters
 
     public Long getBookingId() {
         return bookingId;
@@ -91,13 +87,6 @@ public class BookingDetailDto {
         this.stayTitle = stayTitle;
     }
 
-    public String getStayImageUrl() {
-        return stayImageUrl;
-    }
-
-    public void setStayImageUrl(String stayImageUrl) {
-        this.stayImageUrl = stayImageUrl;
-    }
 
     public String getStayAddress() {
         return stayAddress;
@@ -227,60 +216,22 @@ public class BookingDetailDto {
         this.transactionId = transactionId;
     }
 
-    public Long getHostId() {
-        return hostId;
+    public List<String> getImages() {
+        return images;
     }
 
-    public void setHostId(Long hostId) {
-        this.hostId = hostId;
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 
-    public String getHostName() {
-        return hostName;
+    public String getVideoUrl() {
+        return videoUrl;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
-    public String getHostProfileImage() {
-        return hostProfileImage;
-    }
-
-    public void setHostProfileImage(String hostProfileImage) {
-        this.hostProfileImage = hostProfileImage;
-    }
-
-    public boolean isHostVerified() {
-        return hostVerified;
-    }
-
-    public void setHostVerified(boolean hostVerified) {
-        this.hostVerified = hostVerified;
-    }
-
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-
-    public String getCancelledBy() {
-        return cancelledBy;
-    }
-
-    public void setCancelledBy(String cancelledBy) {
-        this.cancelledBy = cancelledBy;
-    }
-
-    public double getRefundAmount() {
-        return refundAmount;
-    }
-
-    public void setRefundAmount(double refundAmount) {
-        this.refundAmount = refundAmount;
-    }
+   
 
 }
