@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface StayBookingRepository
         extends JpaRepository<StayBooking, Long> {
@@ -27,6 +28,11 @@ public interface StayBookingRepository
     );
 
     List<StayBooking> findByGuestUserIdOrderByCreatedAtDesc(Long guestUserId);
+
+     Optional<StayBooking> findByIdAndGuestUserId(
+            Long id,
+            Long guestUserId
+    );
 
 }
 

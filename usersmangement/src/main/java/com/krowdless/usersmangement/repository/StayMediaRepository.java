@@ -14,4 +14,5 @@ public interface StayMediaRepository
     List<StayMedia> findByStayIdInAndMediaTypeOrderBySortOrderAsc(
             List<Long> stayIds,
             String mediaType);
+  
 }

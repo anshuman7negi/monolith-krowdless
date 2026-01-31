@@ -43,11 +43,22 @@ public class BookingController {
                         "bookingId", bookingId));
     }
 
+    // LIST
     @GetMapping("/my")
-    public ResponseEntity<?> getMyBookings(
-            @RequestParam Long userId) {
+    public ResponseEntity<?> myBookings() {
+        Long userId = SecurityUtil.getCurrentUserId();
         return ResponseEntity.ok(
-                bookingService.getBookingsForUser(userId));
+                bookingService.getMyBookingList(userId));
+    }
+
+        // DETAIL
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<?> bookingDetail(
+            @PathVariable Long bookingId) {
+
+        Long userId = SecurityUtil.getCurrentUserId();
+        return ResponseEntity.ok(
+                bookingService.getBookingDetail(bookingId, userId));
     }
 
 }
