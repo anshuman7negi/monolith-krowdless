@@ -61,7 +61,7 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         // async success simulation
-        simulatePaymentSuccessAsync(fakeOrderId);
+        // simulatePaymentSuccessAsync(fakeOrderId);
 
         return Map.of(
                 "orderId", fakeOrderId,
