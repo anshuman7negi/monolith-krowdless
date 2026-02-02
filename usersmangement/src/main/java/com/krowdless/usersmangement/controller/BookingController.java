@@ -24,8 +24,7 @@ public class BookingController {
             @RequestParam Long stayId,
             @RequestParam String checkInDate,
             @RequestParam String checkOutDate,
-            @RequestParam int guests,
-            @RequestParam double pricePerNight) {
+            @RequestParam int guests) {
 
         Long userId = SecurityUtil.getCurrentUserId();
 
