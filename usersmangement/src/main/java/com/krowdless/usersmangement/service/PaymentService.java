@@ -53,7 +53,7 @@ public class PaymentService {
 
         StayPayment payment = new StayPayment();
         payment.setBooking(booking);
-        payment.setPaymentMethod("DEMO");
+        payment.setPaymentMethod("UPI");
         payment.setPaymentStatus("INITIATED");
         payment.setAmount(price.getFinalAmount());
         payment.setTransactionId(fakeOrderId);
