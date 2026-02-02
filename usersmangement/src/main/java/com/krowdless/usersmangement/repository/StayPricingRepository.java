@@ -10,4 +10,5 @@ public interface StayPricingRepository
                 extends JpaRepository<StayPricing, Long> {
 
         List<StayPricing> findByStayIdIn(List<Long> stayIds);
+
 }

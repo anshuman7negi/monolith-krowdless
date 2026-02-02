@@ -34,8 +34,7 @@ public class BookingController {
                 userId,
                 LocalDate.parse(checkInDate),
                 LocalDate.parse(checkOutDate),
-                guests,
-                pricePerNight);
+                guests);
 
         return ResponseEntity.ok(
                 Map.of(
