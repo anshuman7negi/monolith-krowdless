@@ -221,4 +221,47 @@ public String uploadStayDraftMedia(
 
 
 
+public String uploadTravelPackageImage(
+        Long packageId,
+        MultipartFile file,
+        int sortOrder
+) {
+    try {
+        String ext = file.getOriginalFilename()
+                .substring(file.getOriginalFilename().lastIndexOf('.'));
+
+        String filePath =
+                "travel_packages/package_" + packageId +
+                "/img_" + sortOrder + "_" +
+                System.currentTimeMillis() + ext;
+
+        String uploadUrl = supabaseUrl +
+                "/storage/v1/object/" + bucket + "/" + filePath;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + serviceRoleKey);
+        headers.set("apikey", serviceRoleKey);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        HttpEntity<byte[]> request =
+                new HttpEntity<>(file.getBytes(), headers);
+
+        restTemplate.exchange(
+                uploadUrl,
+                HttpMethod.PUT,
+                request,
+                String.class
+        );
+
+        return supabaseUrl +
+                "/storage/v1/object/public/" +
+                bucket + "/" + filePath;
+
+    } catch (Exception e) {
+        throw new RuntimeException("Travel package image upload failed", e);
+    }
+}
+
+
+
 }
