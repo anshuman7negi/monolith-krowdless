@@ -3,11 +3,12 @@ package com.krowdless.usersmangement.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.krowdless.usersmangement.entity.UserSubscription;
+
 import java.util.Optional;
-import java.util.concurrent.Flow.Subscription;
 
-public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
+public interface SubscriptionRepository extends JpaRepository<UserSubscription, Long> {
 
-    Optional<Subscription> findByUserIdAndIsActiveTrue(Long userId);
+    Optional<UserSubscription> findByUserIdAndIsActiveTrue(Long userId);
 }
 
