@@ -2,13 +2,13 @@ package com.krowdless.controller;
 
 import com.krowdless.dto.DestinationDraftRequest;
 import com.krowdless.entity.DestinationDraft;
+import com.krowdless.entity.UserEntity;
 import com.krowdless.service.DestinationDraftService;
-import com.krowdless.util.SecurityUtil;
-
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 @RestController
@@ -24,17 +24,35 @@ public class DestinationDraftController {
 
     @PostMapping
     public DestinationDraft createDraft(@RequestBody DestinationDraftRequest request) {
-        return service.createDraft(request, SecurityUtil.getCurrentUserId());
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
+        return service.createDraft(request, userId);
     }
 
     @GetMapping("/my")
     public List<DestinationDraft> myDrafts() {
-        return service.getMyDrafts(SecurityUtil.getCurrentUserId());
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
+        return service.getMyDrafts(userId);
     }
 
     @GetMapping("/{id}")
     public DestinationDraft getDraft(@PathVariable Long id) {
-        return service.getDraft(id, SecurityUtil.getCurrentUserId());
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
+        return service.getDraft(id, userId);
     }
 
     @PostMapping(value = "/{draftId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -42,18 +60,36 @@ public class DestinationDraftController {
             @PathVariable Long draftId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("sortOrder") int sortOrder) {
-        service.uploadDraftImage(draftId, file, sortOrder, SecurityUtil.getCurrentUserId());
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
+        service.uploadDraftImage(draftId, file, sortOrder, userId);
     }
 
     @GetMapping("/{draftId}/images")
     public List<?> getDraftImages(
             @PathVariable Long draftId) {
-        return service.getDraftImages(draftId, SecurityUtil.getCurrentUserId());
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
+        return service.getDraftImages(draftId, userId);
     }
 
     @DeleteMapping("/{draftId}")
     public void deleteDraft(@PathVariable Long draftId) {
-        service.deleteDraft(draftId, SecurityUtil.getCurrentUserId());
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
+        service.deleteDraft(draftId, userId);
     }
 
 }

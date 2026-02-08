@@ -1,10 +1,11 @@
 package com.krowdless.controller;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 import com.krowdless.entity.Stay;
+import com.krowdless.entity.UserEntity;
 import com.krowdless.service.StayApprovalService;
-import com.krowdless.util.SecurityUtil;
 
 @RestController
 @RequestMapping("/api/admin/stays")
@@ -22,7 +23,12 @@ public class StayAdminController {
             @PathVariable Long stayDraftId,
             @RequestParam(required = false) String notes
     ) {
-        Long userId = SecurityUtil.getCurrentUserId();
+    	Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+
+        Long userId = user.getId();
         return approvalService.approveDraft(stayDraftId, userId, notes);
     }
 
