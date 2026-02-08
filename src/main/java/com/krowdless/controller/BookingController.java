@@ -1,7 +1,6 @@
 package com.krowdless.controller;
 
 import com.krowdless.service.BookingService;
-import com.krowdless.util.SecurityUtil;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +25,11 @@ public class BookingController {
             @RequestParam String checkOutDate,
             @RequestParam int guests) {
 
-        Long userId = SecurityUtil.getCurrentUserId();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        Long userId = user.getId();
 
         Long bookingId = bookingService.createBooking(
                 stayId,
@@ -44,7 +47,11 @@ public class BookingController {
     // LIST
     @GetMapping("/my")
     public ResponseEntity<?> myBookings() {
-        Long userId = SecurityUtil.getCurrentUserId();
+                Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        Long userId = user.getId();
         return ResponseEntity.ok(
                 bookingService.getMyBookingList(userId));
     }
@@ -54,7 +61,11 @@ public class BookingController {
     public ResponseEntity<?> bookingDetail(
             @PathVariable Long bookingId) {
 
-        Long userId = SecurityUtil.getCurrentUserId();
+                Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        UserEntity user = (UserEntity) authentication.getPrincipal();
+        Long userId = user.getId();
         return ResponseEntity.ok(
                 bookingService.getBookingDetail(bookingId, userId));
     }
