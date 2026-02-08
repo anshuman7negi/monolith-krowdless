@@ -28,9 +28,7 @@ public class BookingController {
     	
     	Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
-
         UserEntity user = (UserEntity) authentication.getPrincipal();
-
         Long userId = user.getId();
 
         Long bookingId = bookingService.createBooking(

@@ -28,7 +28,6 @@ public class DestinationDraftController {
                 SecurityContextHolder.getContext().getAuthentication();
 
         UserEntity user = (UserEntity) authentication.getPrincipal();
-
         Long userId = user.getId();
         return service.createDraft(request, userId);
     }
